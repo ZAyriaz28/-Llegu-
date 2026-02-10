@@ -1,0 +1,29 @@
+@media (max-width: 480px) {
+  .grid {
+    width: 100%; /* El formulario ocupa todo el ancho */
+  }
+
+  .register {
+    padding: 2rem 1.5rem; /* Ajustamos el padding */
+  }
+  
+  .site__logo {
+      width: 130px; /* Logo más grande */
+  }
+
+  h2 {
+    font-size: 2rem; /* Título grande y claro */
+  }
+  
+  .form input[type="text"],
+  .form input[type="email"],
+  .form input[type="password"],
+  .form input[type="submit"] {
+    padding: 1.1rem; /* Campos y botón más altos y fáciles de tocar */
+    font-size: 1.1rem; /* Letra más grande dentro de los campos */
+  }
+
+  p {
+    font-size: 1.1rem; /* Párrafo más grande */
+  }
+}

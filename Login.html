@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso al Sistema Educativo - INATEC</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+    <link rel="stylesheet" href="Login.css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #004a99 0%, #007bff 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            width: 95%;
+            max-width: 420px;
+        }
+
+        .inatec-logo {
+            color: #004a99;
+            font-weight: 600;
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .sub-title {
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            border: 1px solid #ced4da;
+        }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+        }
+
+        .btn-primary {
+            background-color: #004a99;
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #003366;
+            transform: translateY(-2px);
+        }
+
+        .form-select {
+            border-radius: 10px;
+            padding: 0.75rem;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+    <div class="inatec-logo">
+        [Nombre del Sistema]
+    </div>
+    <div class="sub-title">
+        Tecnológico Nacional - Nicaragua
+    </div>
+
+    <form>
+        <div class="mb-3">
+            <label for="user" class="form-label text-dark fw-medium">Usuario o Correo</label>
+            <input type="text" class="form-control" id="user" placeholder="nombre.apellido" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="pass" class="form-label text-dark fw-medium">Contraseña</label>
+            <input type="password" class="form-control" id="pass" placeholder="••••••••" required>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label text-dark fw-medium">Tipo de Usuario</label>
+            <select class="form-select" aria-label="Selección de rol">
+                <option selected value="1">Estudiante</option>
+                <option value="2">Docente / Maestro</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 mb-3">
+            Entrar al Sistema
+        </button>
+        
+        <div class="text-center">
+            <a href="#" class="text-decoration-none small text-primary">¿Problemas para acceder?</a>
+        </div>
+    </form>
+
+    <div class="footer-text">
+        © 2026 Nicaragua - Educación Técnica
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> -->
+
+</body>
+</html>
