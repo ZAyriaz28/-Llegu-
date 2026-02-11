@@ -4,8 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acceso al Sistema Educativo - INATEC</title>
+
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="index.css">
+
+
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -41,10 +50,15 @@
             margin-bottom: 2rem;
         }
 
-        .form-control, .form-select {
+        .form-control {
             border-radius: 10px;
             padding: 0.75rem 1rem;
             border: 1px solid #ced4da;
+        }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
         }
 
         .btn-primary {
@@ -61,6 +75,11 @@
             transform: translateY(-2px);
         }
 
+        .form-select {
+            border-radius: 10px;
+            padding: 0.75rem;
+        }
+
         .footer-text {
             text-align: center;
             margin-top: 1.5rem;
@@ -72,56 +91,86 @@
 <body>
 
 <div class="login-container">
+
     <div class="inatec-logo">
-        [Nombre del Sistema]
+        Sistema Educativo
     </div>
+
     <div class="sub-title">
         Tecnológico Nacional - Nicaragua
     </div>
 
-    <form id="loginForm">
+
+    <!-- FORMULARIO -->
+    <form action="login.php" method="POST">
+
+        <!-- Usuario -->
         <div class="mb-3">
-            <label for="user" class="form-label text-dark fw-medium">Usuario o Correo</label>
-            <input type="text" class="form-control" id="user" placeholder="nombre.apellido" required>
+            <label for="user" class="form-label text-dark fw-medium">
+                Usuario o Correo
+            </label>
+
+            <input type="text"
+                   class="form-control"
+                   id="user"
+                   name="user"
+                   placeholder="nombre.apellido"
+                   required>
         </div>
 
+
+        <!-- Contraseña -->
         <div class="mb-3">
-            <label for="pass" class="form-label text-dark fw-medium">Contraseña</label>
-            <input type="password" class="form-control" id="pass" placeholder="••••••••" required>
+            <label for="pass" class="form-label text-dark fw-medium">
+                Contraseña
+            </label>
+
+            <input type="password"
+                   class="form-control"
+                   id="pass"
+                   name="pass"
+                   placeholder="••••••••"
+                   required>
         </div>
 
+
+        <!-- Rol -->
         <div class="mb-4">
-            <label class="form-label text-dark fw-medium">Tipo de Usuario</label>
-            <select class="form-select" id="tipoUsuario">
+            <label class="form-label text-dark fw-medium">
+                Tipo de Usuario
+            </label>
+
+            <select class="form-select" name="tipo" required>
                 <option value="estudiante">Estudiante</option>
                 <option value="maestro">Docente / Maestro</option>
+                <option value="admin">Administrador</option>
             </select>
         </div>
 
+
+        <!-- Botón -->
         <button type="submit" class="btn btn-primary w-100 mb-3">
             Entrar al Sistema
         </button>
+
+
+        <div class="text-center">
+            <a href="#" class="text-decoration-none small text-primary">
+                ¿Problemas para acceder?
+            </a>
+        </div>
+
     </form>
+
 
     <div class="footer-text">
         © 2026 Nicaragua - Educación Técnica
     </div>
+
 </div>
 
-<script>
-    // Lógica para redireccionar según el usuario seleccionado
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-        e.preventDefault(); // Evita que la página se recargue
-        
-        const tipo = document.getElementById('tipoUsuario').value;
 
-        if (tipo === "estudiante") {
-            window.location.href = "estudiante.html"; // Asegúrate de que tu archivo se llame así
-        } else if (tipo === "maestro") {
-            window.location.href = "maestro.html"; // Asegúrate de que tu archivo se llame así
-        }
-    });
-</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
