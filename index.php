@@ -1,16 +1,16 @@
 <?php
 session_start();
 
-/* ====== CONFIG ====== */
+/* ========= CONFIG BD ========= */
 
-$host = "yallegue-luishebertosuarezflores-2522.f.aivencloud.com";
-$dbname = "defaultdb";
+$host = "scholary-luishebertosuarezflores-2522.d.aivencloud.com";
+$dbname = "Count";
 $user = "avnadmin";
-$pass = "AVNS_g1CmAIgcRPKaMmAkN_I";
+$pass = "AVNS_TpA1uNQyhiJ6IKizI6P";
 $port = 20421;
 
 
-/* ====== CONEXIÓN ====== */
+/* ========= CONEXIÓN ========= */
 
 try {
 
@@ -24,84 +24,93 @@ try {
 
 } catch(PDOException $e){
 
-    die("Error: " . $e->getMessage());
+    die("Error conexión: " . $e->getMessage());
 
 }
 
 
-/* ====== DATOS ====== */
+/* ========= DATOS FORM ========= */
 
 $usuario = $_POST["user"] ?? "";
 $clave   = $_POST["pass"] ?? "";
-$tipo    = $_POST["tipo"] ?? "";
 
 
-/* ====== VALIDAR ====== */
+/* ========= VALIDAR ========= */
 
-if(!$usuario || !$clave){
+if(empty($usuario) || empty($clave)){
 
-    die("Campos vacíos");
+    die("Complete todos los campos");
 
 }
 
 
-/* ====== BUSCAR ====== */
+/* ========= CONSULTA ========= */
 
-$sql = "SELECT * FROM usuarios 
-        WHERE usuario = :u OR correo = :u";
+$sql = "
+SELECT 
+    u.id,
+    u.usuario,
+    u.password,
+    r.nombre AS rol
+FROM usuarios u
+INNER JOIN roles r ON u.rol_id = r.id
+WHERE u.usuario = :u OR u.correo = :u
+LIMIT 1
+";
 
 $stmt = $db->prepare($sql);
-
 $stmt->execute([
     ":u" => $usuario
 ]);
 
-$data = $stmt->fetch(PDO::FETCH_ASSOC);
+$userData = $stmt->fetch(PDO::FETCH_ASSOC);
 
 
-/* ====== EXISTE? ====== */
+/* ========= EXISTE ========= */
 
-if(!$data){
+if(!$userData){
 
-    die("Usuario no existe");
-
-}
-
-
-/* ====== PASSWORD ====== */
-
-if(!password_verify($clave, $data["password"])){
-
-    die("Clave incorrecta");
+    die("Usuario no encontrado");
 
 }
 
 
-/* ====== ROL ====== */
+/* ========= PASSWORD ========= */
 
-if($tipo == 1 && empty($data["estudiante"])){
+if(!password_verify($clave, $userData["password"])){
 
-    die("No eres estudiante");
-
-}
-
-if($tipo == 2 && empty($data["maestro"])){
-
-    die("No eres maestro");
+    die("Contraseña incorrecta");
 
 }
 
 
-/* ====== SESIÓN ====== */
+/* ========= SESIÓN ========= */
 
-$_SESSION["id"] = $data["id"];
-$_SESSION["usuario"] = $data["usuario"];
-$_SESSION["rol"] = $tipo;
+$_SESSION["id"] = $userData["id"];
+$_SESSION["usuario"] = $userData["usuario"];
+$_SESSION["rol"] = $userData["rol"];
 
 
-/* ====== OK ====== */
+/* ========= REDIRECCIÓN ========= */
 
-header("Location: panel.php");
+switch($userData["rol"]){
+
+    case "admin":
+        header("Location: admin.php");
+        break;
+
+    case "maestro":
+        header("Location: maestro.html");
+        break;
+
+    case "estudiante":
+        header("Location: estudiante.html");
+        break;
+
+    default:
+        header("Location: panel.php");
+}
+
 exit;
 
 ?>
