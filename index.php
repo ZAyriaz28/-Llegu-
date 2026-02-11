@@ -3,10 +3,10 @@ session_start();
 
 /* ========= CONFIG BD ========= */
 
-$host = "scholary-luishebertosuarezflores-2522.d.aivencloud.com";
-$dbname = "Count";
+$host = "yallegue-luishebertosuarezflores-2522.f.aivencloud.com";
+$dbname = "defaultdb";
 $user = "avnadmin";
-$pass = "AVNS_TpA1uNQyhiJ6IKizI6P";
+$pass = "AVNS_g1CmAIgcRPKaMmAkN_I";
 $port = 20421;
 
 
