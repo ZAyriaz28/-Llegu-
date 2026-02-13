@@ -99,22 +99,23 @@
             Tecnológico Nacional - Nicaragua
         </div>
 
-        <form id="loginForm">
+        <form action="login.php" method="POST" id="loginForm">
             <div class="mb-3">
                 <label for="user" class="form-label text-dark fw-medium">Usuario o Correo</label>
-                <input type="text" class="form-control" id="user" placeholder="nombre.apellido" required>
+                <input type="text" class="form-control" id="user" name="user" placeholder="nombre.apellido" required>
             </div>
 
             <div class="mb-3">
                 <label for="pass" class="form-label text-dark fw-medium">Contraseña</label>
-                <input type="password" class="form-control" id="pass" placeholder="••••••••" required>
+                <input type="password" class="form-control" id="pass" name="pass" placeholder="••••••••" required>
             </div>
 
             <div class="mb-4">
                 <label class="form-label text-dark fw-medium">Tipo de Usuario</label>
-                <select class="form-select" id="tipoUsuario">
+                <select class="form-select" name="tipo">
                     <option value="estudiante">Estudiante</option>
                     <option value="maestro">Docente / Maestro</option>
+                    <option value="admin">Administrador</option>
                 </select>
             </div>
 
