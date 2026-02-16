@@ -13,17 +13,17 @@ $pass2  = $_POST["pass_confirm"] ?? "";
 
 /* ================= VALIDAR ================= */
 
-if(
+if (
     empty($nombre) ||
     empty($correo) ||
     empty($user) ||
     empty($pass) ||
     empty($pass2)
-){
+) {
     die("Campos incompletos");
 }
 
-if($pass !== $pass2){
+if ($pass !== $pass2) {
     die("Las contraseñas no coinciden");
 }
 
@@ -33,7 +33,7 @@ $sql = "SELECT id FROM usuarios WHERE usuario = ? OR correo = ? LIMIT 1";
 $stmt = $db->prepare($sql);
 $stmt->execute([$user, $correo]);
 
-if($stmt->fetch()){
+if ($stmt->fetch()) {
     die("Usuario o correo ya registrado");
 }
 
@@ -66,7 +66,7 @@ $user_id = $db->lastInsertId();
 /* ================= GENERAR CÓDIGO ================= */
 
 $codigo = random_int(100000, 999999);
-$expira = date("Y-m-d H:i:s", time() + 300); // 5 minutos
+$expira = date("Y-m-d H:i:s", time() + 300);
 
 /* ================= GUARDAR CÓDIGO ================= */
 
@@ -86,9 +86,63 @@ $stmt->execute([
 
 $_SESSION["pendiente_verificacion"] = $user_id;
 
-/* ================= MAIL (DESPUÉS) ================= */
 
-// Aquí luego va PHPMailer
+/* ================= MAIL ================= */
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require __DIR__ . '/vendor/autoload.php';
+
+$mail = new PHPMailer(true);
+
+try {
+
+    // Config SMTP Gmail
+    $mail->isSMTP();
+    $mail->Host       = 'smtp.gmail.com';
+    $mail->SMTPAuth   = true;
+
+    // 🔴 CAMBIA ESTO
+    $mail->Username   = 'TU_CORREO@gmail.com';
+    $mail->Password   = 'TU_PASSWORD_APP';
+
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->Port       = 587;
+
+    // Remitente
+    $mail->setFrom('TU_CORREO@gmail.com', 'Sistema Escolar');
+
+    // Destinatario
+    $mail->addAddress($correo, $nombre);
+
+    // Contenido
+    $mail->isHTML(true);
+    $mail->Subject = 'Codigo de Verificacion';
+
+    $mail->Body = "
+        <div style='font-family:Arial'>
+            <h2>Verificación de cuenta</h2>
+
+            <p>Hola <b>$nombre</b>,</p>
+
+            <p>Tu código es:</p>
+
+            <h1 style='color:#ff6600'>$codigo</h1>
+
+            <p>Este código vence en 5 minutos.</p>
+        </div>
+    ";
+
+    $mail->AltBody = "Tu codigo es: $codigo";
+
+    $mail->send();
+
+} catch (Exception $e) {
+
+    die("Error enviando correo: " . $mail->ErrorInfo);
+}
+
 
 /* ================= REDIRECCIÓN ================= */
 
