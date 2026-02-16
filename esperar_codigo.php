@@ -5,10 +5,6 @@ if (!isset($_SESSION["pendiente_verificacion"])) {
     header("Location: index.html");
     exit;
 }
-
-$nombre = $_SESSION["nombre_email"] ?? "";
-$correo = $_SESSION["correo_email"] ?? "";
-$codigo = $_SESSION["codigo_email"] ?? "";
 ?>
 
 <!DOCTYPE html>
@@ -19,15 +15,6 @@ $codigo = $_SESSION["codigo_email"] ?? "";
 <title>Verificación</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-
-<!-- EmailJS -->
-<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-
-<script>
-(function(){
-    emailjs.init("aYQj8l4hubsf4dk3f"); // TU PUBLIC KEY
-})();
-</script>
 
 <style>
 
@@ -94,6 +81,14 @@ body{
     margin-bottom:10px;
 }
 
+.resend{
+    background:#28a745;
+}
+
+.resend:hover{
+    background:#1e7e34;
+}
+
 </style>
 </head>
 
@@ -124,40 +119,17 @@ body{
 </form>
 
 
-<!-- BOTÓN EMAILJS -->
-<button onclick="enviarCorreo()" style="background:#28a745;">
-Enviar / Reenviar código
+<!-- REENVIAR (BACKEND) -->
+<form action="enviar_codigo.php" method="POST">
+
+<button type="submit" class="resend">
+Reenviar código
 </button>
 
+</form>
+
+
 </div>
-
-
-<script>
-
-function enviarCorreo(){
-
-    const params = {
-        user_name: "<?php echo $nombre ?>",
-        verification_code: "<?php echo $codigo ?>",
-        to_email: "<?php echo $correo ?>"   // DESTINO
-    };
-
-    emailjs.send(
-        "service_z2iq85g",      // SERVICE
-        "template_um7o5c8",     // TEMPLATE
-        params
-    ).then(function(){
-
-        window.location = "esperar_codigo.php?ok=1";
-
-    }, function(error){
-
-        alert("Error enviando: " + error.text);
-
-    });
-}
-
-</script>
 
 </body>
 </html>
