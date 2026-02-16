@@ -1,14 +1,29 @@
 <?php
 session_start();
+require_once "config/db.php";
 
 if (!isset($_SESSION["pendiente_verificacion"])) {
     header("Location: index.html");
     exit;
 }
 
-$nombre = $_SESSION["email_nombre"] ?? "";
-$correo = $_SESSION["email_correo"] ?? "";
-$codigo = $_SESSION["email_codigo"] ?? "";
+$user_id = $_SESSION["pendiente_verificacion"];
+
+
+/* BUSCAR USUARIO */
+
+$sql = "SELECT nombre, correo FROM usuarios WHERE id = ? LIMIT 1";
+$stmt = $db->prepare($sql);
+$stmt->execute([$user_id]);
+
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if(!$user){
+    die("Usuario no encontrado");
+}
+
+$nombre = $user["nombre"];
+$correo = $user["correo"];
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -24,7 +39,7 @@ $codigo = $_SESSION["email_codigo"] ?? "";
 
 <script>
 (function(){
-    emailjs.init("aYQj8l4hubsf4dk3f"); // TU PUBLIC KEY
+    emailjs.init("aYQj8l4hubsf4dk3f");
 })();
 </script>
 
@@ -109,15 +124,16 @@ body{
 <div class="box">
 
 <?php if(isset($_GET["ok"])): ?>
-<p class="green">Código enviado correctamente ✔</p>
+<p class="green">Código enviado ✔</p>
 <?php endif; ?>
 
 <h2>Verificación</h2>
 
-<p>Revisa tu correo e ingresa el código</p>
+<p>Revisa tu correo</p>
 
 
-<!-- FORM VERIFICAR -->
+<!-- VERIFICAR -->
+
 <form action="verificar_codigo.php" method="POST">
 
 <input type="text"
@@ -131,7 +147,8 @@ body{
 </form>
 
 
-<!-- BOTÓN REENVIAR -->
+<!-- REENVIAR -->
+
 <button onclick="reenviarCodigo()" class="resend">
 Reenviar código
 </button>
@@ -156,7 +173,7 @@ function reenviarCodigo(){
         const params = {
             to_name: "<?php echo $nombre ?>",
             to_email: "<?php echo $correo ?>",
-            code: "<?php echo $codigo ?>"
+            code: "Nuevo código enviado"
         };
 
         emailjs.send(
@@ -173,12 +190,8 @@ function reenviarCodigo(){
 
         });
 
-    })
-    .catch(()=>{
-
-        alert("Error de conexión");
-
     });
+
 }
 
 </script>
