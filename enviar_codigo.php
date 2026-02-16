@@ -1,14 +1,9 @@
 <?php
+
 session_start();
 require_once "config/db.php";
 
-/* PHPMailer con Composer */
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
-require_once __DIR__ . "/vendor/autoload.php";
-
-/* Verificar sesión */
+/* ================= VALIDAR SESIÓN ================= */
 
 if (!isset($_SESSION["pendiente_verificacion"])) {
     header("Location: index.html");
@@ -18,7 +13,7 @@ if (!isset($_SESSION["pendiente_verificacion"])) {
 $user_id = $_SESSION["pendiente_verificacion"];
 
 
-/* Buscar datos del usuario */
+/* ================= BUSCAR USUARIO ================= */
 
 $sql = "SELECT nombre, correo FROM usuarios WHERE id = ? LIMIT 1";
 $stmt = $db->prepare($sql);
@@ -34,20 +29,20 @@ $nombre = $usuario["nombre"];
 $correo = $usuario["correo"];
 
 
-/* Generar código */
+/* ================= GENERAR CÓDIGO ================= */
 
 $codigo = random_int(100000, 999999);
-$expira = date("Y-m-d H:i:s", time() + 300); // 5 min
+$expira = date("Y-m-d H:i:s", time() + 300); // 5 minutos
 
 
-/* Borrar códigos anteriores */
+/* ================= LIMPIAR CÓDIGOS ANTERIORES ================= */
 
 $sql = "DELETE FROM codigos_verificacion WHERE usuario_id = ?";
 $stmt = $db->prepare($sql);
 $stmt->execute([$user_id]);
 
 
-/* Guardar nuevo código */
+/* ================= GUARDAR CÓDIGO ================= */
 
 $sql = "INSERT INTO codigos_verificacion (usuario_id, codigo, expira_en)
         VALUES (?,?,?)";
@@ -61,60 +56,61 @@ $stmt->execute([
 ]);
 
 
-/* Enviar correo */
+/* ================= CONFIG EMAILJS ================= */
 
-$mail = new PHPMailer(true);
+$service_id  = "service_z2iq85g";
+$template_id = "template_um7o5c8";
+$public_key  = "aYQj8l4hubsf4dk3f";
 
-try {
+$url = "https://api.emailjs.com/api/v1.0/email/send";
 
-    // Config SMTP
-    $mail->isSMTP();
-    $mail->Host       = "smtp.gmail.com";
-    $mail->SMTPAuth   = true;
 
-    $mail->Username   = "correo.automatizado.yallegue@gmail.com";
-    $mail->Password   = "kmso gcnb zxlt mynf";
+/* ================= DATOS A ENVIAR ================= */
 
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-    $mail->Port       = 587;
+$data = [
+    "service_id" => $service_id,
+    "template_id" => $template_id,
+    "user_id" => $public_key,
 
-    // Remitente
-    $mail->setFrom("correo.automatizado.yallegue@gmail.com", "Sistema Escolar");
+    "template_params" => [
+        "to_email"  => $correo,
+        "to_name"   => $nombre,
+        "code"      => $codigo,
+        "from_name" => "Sistema Escolar"
+    ]
+];
 
-    // Destino
-    $mail->addAddress($correo, $nombre);
+$payload = json_encode($data);
 
-    // Contenido
-    $mail->isHTML(true);
 
-    $mail->Subject = "Código de Verificación";
+/* ================= ENVIAR A EMAILJS ================= */
 
-    $mail->Body = "
-        <div style='font-family:Arial'>
-            <h2>Verificación</h2>
+$ch = curl_init($url);
 
-            <p>Hola <b>$nombre</b>,</p>
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-            <p>Tu código es:</p>
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    "Content-Type: application/json",
+    "Content-Length: " . strlen($payload)
+]);
 
-            <h1 style='color:#ff6600'>$codigo</h1>
+$response = curl_exec($ch);
 
-            <p>Vence en 5 minutos.</p>
-        </div>
-    ";
+$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-    $mail->AltBody = "Tu código es: $codigo";
+curl_close($ch);
 
-    $mail->send();
 
-} catch (Exception $e) {
+/* ================= VERIFICAR ENVÍO ================= */
 
-    die("Error enviando correo: " . $mail->ErrorInfo);
-
+if ($http_code !== 200) {
+    die("Error al enviar el correo. Intenta más tarde.");
 }
 
 
-/* Volver a pantalla */
+/* ================= REDIRIGIR ================= */
 
-header("Location: esperar_codigo.php");
+header("Location: esperar_codigo.php?ok=1");
 exit;
