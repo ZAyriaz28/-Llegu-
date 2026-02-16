@@ -5,8 +5,11 @@ if (!isset($_SESSION["pendiente_verificacion"])) {
     header("Location: index.html");
     exit;
 }
-?>
 
+$nombre = $_SESSION["email_nombre"] ?? "";
+$correo = $_SESSION["email_correo"] ?? "";
+$codigo = $_SESSION["email_codigo"] ?? "";
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -15,6 +18,15 @@ if (!isset($_SESSION["pendiente_verificacion"])) {
 <title>Verificación</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- EmailJS -->
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+<script>
+(function(){
+    emailjs.init("aYQj8l4hubsf4dk3f"); // TU PUBLIC KEY
+})();
+</script>
 
 <style>
 
@@ -119,17 +131,57 @@ body{
 </form>
 
 
-<!-- REENVIAR (BACKEND) -->
-<form action="enviar_codigo.php" method="POST">
-
-<button type="submit" class="resend">
+<!-- BOTÓN REENVIAR -->
+<button onclick="reenviarCodigo()" class="resend">
 Reenviar código
 </button>
 
-</form>
-
 
 </div>
+
+
+<script>
+
+function reenviarCodigo(){
+
+    fetch("enviar_codigo.php")
+    .then(r => r.text())
+    .then(res => {
+
+        if(res !== "OK"){
+            alert("Error generando código");
+            return;
+        }
+
+        const params = {
+            to_name: "<?php echo $nombre ?>",
+            to_email: "<?php echo $correo ?>",
+            code: "<?php echo $codigo ?>"
+        };
+
+        emailjs.send(
+            "service_z2iq85g",
+            "template_um7o5c8",
+            params
+        ).then(()=>{
+
+            window.location = "esperar_codigo.php?ok=1";
+
+        }).catch(error=>{
+
+            alert("Error EmailJS: " + error.text);
+
+        });
+
+    })
+    .catch(()=>{
+
+        alert("Error de conexión");
+
+    });
+}
+
+</script>
 
 </body>
 </html>
