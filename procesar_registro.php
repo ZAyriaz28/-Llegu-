@@ -104,14 +104,14 @@ try {
     $mail->SMTPAuth   = true;
 
     // 🔴 CAMBIA ESTO
-    $mail->Username   = 'TU_CORREO@gmail.com';
-    $mail->Password   = 'TU_PASSWORD_APP';
+    $mail->Username   = 'correo.automatizado. yallegue@gmail.com';
+    $mail->Password   = 'qmoe cvih uewo idfh';
 
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port       = 587;
 
     // Remitente
-    $mail->setFrom('TU_CORREO@gmail.com', 'Sistema Escolar');
+    $mail->setFrom('correo.automatizado.yallegue@gmail.com', 'Sistema Escolar');
 
     // Destinatario
     $mail->addAddress($correo, $nombre);
