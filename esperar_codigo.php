@@ -5,6 +5,10 @@ if (!isset($_SESSION["pendiente_verificacion"])) {
     header("Location: index.html");
     exit;
 }
+
+$nombre = $_SESSION["nombre_email"] ?? "";
+$correo = $_SESSION["correo_email"] ?? "";
+$codigo = $_SESSION["codigo_email"] ?? "";
 ?>
 
 <!DOCTYPE html>
@@ -15,6 +19,15 @@ if (!isset($_SESSION["pendiente_verificacion"])) {
 <title>Verificación</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- EmailJS -->
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+<script>
+(function(){
+    emailjs.init("aYQj8l4hubsf4dk3f"); // TU PUBLIC KEY
+})();
+</script>
 
 <style>
 
@@ -44,7 +57,6 @@ body{
 
 .box h2{
     color:#004a99;
-    margin-bottom:10px;
 }
 
 .box p{
@@ -90,13 +102,15 @@ body{
 <div class="box">
 
 <?php if(isset($_GET["ok"])): ?>
-    <p class="green">Código enviado</p>
+<p class="green">Código enviado correctamente ✔</p>
 <?php endif; ?>
 
 <h2>Verificación</h2>
 
 <p>Revisa tu correo e ingresa el código</p>
 
+
+<!-- FORM VERIFICAR -->
 <form action="verificar_codigo.php" method="POST">
 
 <input type="text"
@@ -110,15 +124,40 @@ body{
 </form>
 
 
-<form action="enviar_codigo.php" method="POST">
-
-<button type="submit" style="background:#28a745;">
-Reenviar código
+<!-- BOTÓN EMAILJS -->
+<button onclick="enviarCorreo()" style="background:#28a745;">
+Enviar / Reenviar código
 </button>
 
-</form>
-
 </div>
+
+
+<script>
+
+function enviarCorreo(){
+
+    const params = {
+        user_name: "<?php echo $nombre ?>",
+        verification_code: "<?php echo $codigo ?>",
+        to_email: "<?php echo $correo ?>"   // DESTINO
+    };
+
+    emailjs.send(
+        "service_z2iq85g",      // SERVICE
+        "template_um7o5c8",     // TEMPLATE
+        params
+    ).then(function(){
+
+        window.location = "esperar_codigo.php?ok=1";
+
+    }, function(error){
+
+        alert("Error enviando: " + error.text);
+
+    });
+}
+
+</script>
 
 </body>
 </html>
