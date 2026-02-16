@@ -171,9 +171,9 @@ function reenviarCodigo(){
         }
 
         const params = {
-            to_name: "<?php echo $nombre ?>",
+            user_name: "<?php echo $nombre ?>",
             to_email: "<?php echo $correo ?>",
-            code: "Nuevo código enviado"
+            verification_code: "Nuevo código enviado"
         };
 
         emailjs.send(
