@@ -1,6 +1,6 @@
 <?php
 session_start();
-require "config/db.php";
+require_once "config/db.php";
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
