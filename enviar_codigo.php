@@ -73,7 +73,7 @@ try {
     $mail->SMTPAuth   = true;
 
     $mail->Username   = "correo.automatizado.yallegue@gmail.com";
-    $mail->Password   = "qmoe cvih uewo idfh";
+    $mail->Password   = "kmso gcnb zxlt mynf";
 
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port       = 587;
