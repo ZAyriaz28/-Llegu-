@@ -37,8 +37,8 @@ try{
     $mail->Host = "smtp.gmail.com";
     $mail->SMTPAuth = true;
 
-    $mail->Username = "TU_CORREO@gmail.com";
-    $mail->Password = "TU_CLAVE_APP";
+    $mail->Username = "correo.automatizado.yallegue@gmail.com";
+    $mail->Password = "qmoe cvih uewo idfh";
 
     $mail->SMTPSecure = "tls";
     $mail->Port = 587;
