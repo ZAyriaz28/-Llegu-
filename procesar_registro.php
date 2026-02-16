@@ -1,6 +1,11 @@
 <?php
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 session_start();
 require_once "config/db.php";
+require __DIR__ . '/vendor/autoload.php';
 
 /* ================= DATOS ================= */
 
@@ -89,23 +94,19 @@ $_SESSION["pendiente_verificacion"] = $user_id;
 
 /* ================= MAIL ================= */
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
-require __DIR__ . '/vendor/autoload.php';
-
 $mail = new PHPMailer(true);
 
 try {
 
-    // Config SMTP Gmail
     $mail->isSMTP();
     $mail->Host       = 'smtp.gmail.com';
     $mail->SMTPAuth   = true;
 
-    // 🔴 CAMBIA ESTO
-    $mail->Username   = 'correo.automatizado. yallegue@gmail.com';
-    $mail->Password   = 'qmoe cvih uewo idfh';
+    // TU CORREO REAL (sin espacios)
+    $mail->Username   = 'correo.automatizado.yallegue@gmail.com';
+
+    // Contraseña de aplicación
+    $mail->Password   = 'qmoecvihuewoidfh';
 
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port       = 587;
