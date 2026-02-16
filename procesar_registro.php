@@ -2,18 +2,24 @@
 session_start();
 require_once "config/db.php";
 
-/* DATOS */
+/* ================= DATOS ================= */
 
-$nombre = $_POST["nombre"] ?? "";
-$correo = $_POST["correo"] ?? "";
-$user   = $_POST["user"] ?? "";
-$tipo   = $_POST["tipo"] ?? "";
+$nombre = trim($_POST["nombre"] ?? "");
+$correo = trim($_POST["correo"] ?? "");
+$user   = trim($_POST["user"] ?? "");
+$tipo   = trim($_POST["tipo"] ?? "");
 $pass   = $_POST["pass"] ?? "";
 $pass2  = $_POST["pass_confirm"] ?? "";
 
-/* VALIDAR */
+/* ================= VALIDAR ================= */
 
-if(!$nombre || !$correo || !$user || !$pass){
+if(
+    empty($nombre) ||
+    empty($correo) ||
+    empty($user) ||
+    empty($pass) ||
+    empty($pass2)
+){
     die("Campos incompletos");
 }
 
@@ -21,23 +27,34 @@ if($pass !== $pass2){
     die("Las contraseñas no coinciden");
 }
 
-/* HASH */
+/* ================= VALIDAR DUPLICADOS ================= */
+
+$sql = "SELECT id FROM usuarios WHERE usuario = ? OR correo = ? LIMIT 1";
+$stmt = $db->prepare($sql);
+$stmt->execute([$user, $correo]);
+
+if($stmt->fetch()){
+    die("Usuario o correo ya registrado");
+}
+
+/* ================= HASH ================= */
 
 $hash = password_hash($pass, PASSWORD_DEFAULT);
 
-/* ROL */
+/* ================= ROL ================= */
 
-$rol_id = ($tipo == "maestro") ? 2 : 3;
+$rol_id = ($tipo === "maestro") ? 2 : 3;
 
-/* INSERTAR USUARIO */
+/* ================= INSERTAR USUARIO ================= */
 
 $sql = "INSERT INTO usuarios 
-(usuario, correo, password, rol_id, verified)
-VALUES (?,?,?,?,0)";
+(nombre, usuario, correo, password, rol_id, verified)
+VALUES (?,?,?,?,?,0)";
 
 $stmt = $db->prepare($sql);
 
 $stmt->execute([
+    $nombre,
     $user,
     $correo,
     $hash,
@@ -46,12 +63,12 @@ $stmt->execute([
 
 $user_id = $db->lastInsertId();
 
-/* GENERAR CÓDIGO */
+/* ================= GENERAR CÓDIGO ================= */
 
 $codigo = random_int(100000, 999999);
-$expira = date("Y-m-d H:i:s", time()+300);
+$expira = date("Y-m-d H:i:s", time() + 300); // 5 minutos
 
-/* GUARDAR CODIGO */
+/* ================= GUARDAR CÓDIGO ================= */
 
 $sql = "INSERT INTO codigos_verificacion
 (usuario_id, codigo, expira_en)
@@ -65,14 +82,15 @@ $stmt->execute([
     $expira
 ]);
 
-/* GUARDAR EN SESION */
+/* ================= SESIÓN ================= */
 
 $_SESSION["pendiente_verificacion"] = $user_id;
 
-/* ENVIAR MAIL */
-// (aquí va PHPMailer luego)
+/* ================= MAIL (DESPUÉS) ================= */
 
-/* REDIRIGIR */
+// Aquí luego va PHPMailer
+
+/* ================= REDIRECCIÓN ================= */
 
 header("Location: esperar_codigo.php");
 exit;
