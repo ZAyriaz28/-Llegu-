@@ -2,13 +2,24 @@
 session_start();
 require_once "config/db.php";
 
-if(!isset($_SESSION["pendiente_verificacion"])){
+/* Verificar conexión */
+if (!isset($pdo)) {
+    die("❌ Error: No hay conexión a la base de datos");
+}
+
+/* Validar sesión */
+if (!isset($_SESSION["pendiente_verificacion"])) {
     header("Location: index.html");
     exit;
 }
 
 $email  = $_SESSION["pendiente_verificacion"];
 $codigo = $_POST["codigo"] ?? "";
+
+/* Validar datos */
+if (empty($codigo)) {
+    die("❌ Debes ingresar el código");
+}
 
 /* Buscar código */
 
@@ -22,7 +33,7 @@ $sql = $pdo->prepare("
 
 $sql->execute([$email, $codigo]);
 
-if($sql->rowCount() == 0){
+if ($sql->rowCount() == 0) {
     die("❌ Código incorrecto");
 }
 
