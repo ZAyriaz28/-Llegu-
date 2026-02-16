@@ -10,15 +10,14 @@ if (!isset($_SESSION["pendiente_verificacion"])) {
 $user_id = $_SESSION["pendiente_verificacion"];
 
 
-/* BUSCAR USUARIO */
-
+// Buscar usuario
 $sql = "SELECT nombre, correo FROM usuarios WHERE id = ? LIMIT 1";
 $stmt = $db->prepare($sql);
 $stmt->execute([$user_id]);
 
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if(!$user){
+if (!$user) {
     die("Usuario no encontrado");
 }
 
@@ -39,7 +38,7 @@ $correo = $user["correo"];
 
 <script>
 (function(){
-    emailjs.init("aYQj8l4hubsf4dk3f");
+    emailjs.init("aYQj8l4hubsf4dk3f"); // TU PUBLIC KEY
 })();
 </script>
 
@@ -133,7 +132,6 @@ body{
 
 
 <!-- VERIFICAR -->
-
 <form action="verificar_codigo.php" method="POST">
 
 <input type="text"
@@ -148,11 +146,9 @@ body{
 
 
 <!-- REENVIAR -->
-
 <button onclick="reenviarCodigo()" class="resend">
 Reenviar código
 </button>
-
 
 </div>
 
@@ -162,33 +158,48 @@ Reenviar código
 function reenviarCodigo(){
 
     fetch("enviar_codigo.php")
-    .then(r => r.text())
-    .then(res => {
 
-        if(res !== "OK"){
-            alert("Error generando código");
+    .then(res => res.text())
+
+    .then(codigo => {
+
+        if(codigo === "NO_SESSION" || codigo === "NO_USER"){
+            alert("Sesión inválida");
             return;
         }
 
         const params = {
-            user_name: "<?php echo $nombre ?>",
-            to_email: "<?php echo $correo ?>",
-            verification_code: "Nuevo código enviado"
+            user_name: <?php echo json_encode($nombre); ?>,
+            to_email: <?php echo json_encode($correo); ?>,
+            verification_code: codigo
         };
+
+        console.log("Enviando:", params);
+
 
         emailjs.send(
             "service_z2iq85g",
             "template_um7o5c8",
             params
-        ).then(()=>{
+        )
+
+        .then(() => {
 
             window.location = "esperar_codigo.php?ok=1";
 
-        }).catch(error=>{
+        })
+
+        .catch(error => {
 
             alert("Error EmailJS: " + error.text);
 
         });
+
+    })
+
+    .catch(err => {
+
+        alert("Error servidor");
 
     });
 
