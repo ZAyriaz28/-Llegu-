@@ -108,11 +108,14 @@ curl_close($ch);
 
 if ($http_code !== 200) {
 
-    // DEBUG (si falla)
-    // echo $response;
-    // exit;
+    echo "<h3>Error EmailJS</h3>";
+    echo "HTTP: " . $http_code . "<br>";
+    echo "Respuesta:<br>";
+    echo "<pre>";
+    print_r($response);
+    echo "</pre>";
 
-    die("Error al enviar el correo. Intenta más tarde.");
+    exit;
 }
 
 
