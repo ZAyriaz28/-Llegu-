@@ -60,7 +60,7 @@ $stmt->execute([
 
 $service_id  = "service_z2iq85g";
 $template_id = "template_um7o5c8";
-$private_key = "JCgJzidrPl7ef0VbygXvJ"; // CAMBIAR LUEGO
+$private_key = "aYQj8l4hubsf4dk3f"; // CAMBIAR LUEGO
 
 $url = "https://api.emailjs.com/api/v1.0/email/send";
 
