@@ -3,7 +3,7 @@ session_start();
 require_once "config/db.php";
 
 /* Verificar conexión */
-if (!isset($pdo)) {
+if (!isset($db)) {
     die("❌ Error: No hay conexión a la base de datos");
 }
 
@@ -13,51 +13,61 @@ if (!isset($_SESSION["pendiente_verificacion"])) {
     exit;
 }
 
-$email  = $_SESSION["pendiente_verificacion"];
-$codigo = $_POST["codigo"] ?? "";
+/* Datos */
+$user_id = $_SESSION["pendiente_verificacion"];
+$codigo  = $_POST["codigo"] ?? "";
 
-/* Validar datos */
+/* Validar código */
 if (empty($codigo)) {
     die("❌ Debes ingresar el código");
 }
 
-/* Buscar código */
 
-$sql = $pdo->prepare("
-    SELECT id 
+/* ================= BUSCAR CÓDIGO ================= */
+
+$sql = $db->prepare("
+    SELECT id
     FROM codigos_verificacion
-    WHERE email = ? AND codigo = ?
+    WHERE usuario_id = ? AND codigo = ?
+    AND expira_en > NOW()
     ORDER BY id DESC
     LIMIT 1
 ");
 
-$sql->execute([$email, $codigo]);
+$sql->execute([$user_id, $codigo]);
 
 if ($sql->rowCount() == 0) {
-    die("❌ Código incorrecto");
+    die("❌ Código incorrecto o vencido");
 }
 
-/* Activar usuario */
 
-$up = $pdo->prepare("
-    UPDATE usuarios 
-    SET verificado = 1
-    WHERE email = ?
+/* ================= ACTIVAR USUARIO ================= */
+
+$up = $db->prepare("
+    UPDATE usuarios
+    SET verified = 1
+    WHERE id = ?
 ");
 
-$up->execute([$email]);
+$up->execute([$user_id]);
 
-/* Borrar códigos usados */
 
-$del = $pdo->prepare("
+/* ================= BORRAR CÓDIGOS ================= */
+
+$del = $db->prepare("
     DELETE FROM codigos_verificacion
-    WHERE email = ?
+    WHERE usuario_id = ?
 ");
 
-$del->execute([$email]);
+$del->execute([$user_id]);
 
-/* Limpiar sesión */
+
+/* ================= LIMPIAR SESIÓN ================= */
 
 unset($_SESSION["pendiente_verificacion"]);
 
-echo "✅ Cuenta verificada correctamente";
+
+/* ================= REDIRIGIR ================= */
+
+header("Location: login.php?verified=1");
+exit;
