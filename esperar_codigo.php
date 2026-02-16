@@ -1,120 +1,124 @@
 <?php
 session_start();
-require_once "config/db.php";
-
-/* PHPMailer con Composer */
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
-require_once __DIR__ . "/vendor/autoload.php";
-
-/* Verificar sesión */
 
 if (!isset($_SESSION["pendiente_verificacion"])) {
     header("Location: index.html");
     exit;
 }
+?>
 
-$user_id = $_SESSION["pendiente_verificacion"];
+<!DOCTYPE html>
+<html lang="es">
+<head>
 
+<meta charset="UTF-8">
+<title>Verificación</title>
 
-/* Buscar datos del usuario */
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
-$sql = "SELECT nombre, correo FROM usuarios WHERE id = ? LIMIT 1";
-$stmt = $db->prepare($sql);
-$stmt->execute([$user_id]);
+<style>
 
-$usuario = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$usuario) {
-    die("Usuario no encontrado");
+*{
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
 }
 
-$nombre = $usuario["nombre"];
-$correo = $usuario["correo"];
-
-
-/* Generar código */
-
-$codigo = random_int(100000, 999999);
-$expira = date("Y-m-d H:i:s", time() + 300); // 5 min
-
-
-/* Borrar códigos anteriores */
-
-$sql = "DELETE FROM codigos_verificacion WHERE usuario_id = ?";
-$stmt = $db->prepare($sql);
-$stmt->execute([$user_id]);
-
-
-/* Guardar nuevo código */
-
-$sql = "INSERT INTO codigos_verificacion (usuario_id, codigo, expira_en)
-        VALUES (?,?,?)";
-
-$stmt = $db->prepare($sql);
-
-$stmt->execute([
-    $user_id,
-    $codigo,
-    $expira
-]);
-
-
-/* Enviar correo */
-
-$mail = new PHPMailer(true);
-
-try {
-
-    // Config SMTP
-    $mail->isSMTP();
-    $mail->Host       = "smtp.gmail.com";
-    $mail->SMTPAuth   = true;
-
-    $mail->Username   = "correo.automatizado.yallegue@gmail.com";
-    $mail->Password   = "qmoe cvih uewo idfh";
-
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-    $mail->Port       = 587;
-
-    // Remitente
-    $mail->setFrom("correo.automatizado.yallegue@gmail.com", "Sistema Escolar");
-
-    // Destino
-    $mail->addAddress($correo, $nombre);
-
-    // Contenido
-    $mail->isHTML(true);
-
-    $mail->Subject = "Código de Verificación";
-
-    $mail->Body = "
-        <div style='font-family:Arial'>
-            <h2>Verificación</h2>
-
-            <p>Hola <b>$nombre</b>,</p>
-
-            <p>Tu código es:</p>
-
-            <h1 style='color:#ff6600'>$codigo</h1>
-
-            <p>Vence en 5 minutos.</p>
-        </div>
-    ";
-
-    $mail->AltBody = "Tu código es: $codigo";
-
-    $mail->send();
-
-} catch (Exception $e) {
-
-    die("Error enviando correo: " . $mail->ErrorInfo);
-
+body{
+    margin:0;
+    min-height:100vh;
+    background:linear-gradient(135deg,#004a99,#007bff);
+    display:flex;
+    justify-content:center;
+    align-items:center;
 }
 
+.box{
+    background:white;
+    width:100%;
+    max-width:400px;
+    padding:2.5rem;
+    border-radius:20px;
+    box-shadow:0 15px 35px rgba(0,0,0,.25);
+    text-align:center;
+}
 
-/* Volver a pantalla */
+.box h2{
+    color:#004a99;
+    margin-bottom:10px;
+}
 
-header("Location: esperar_codigo.php");
-exit;
+.box p{
+    color:#6c757d;
+    margin-bottom:25px;
+}
+
+.box input{
+    width:100%;
+    padding:12px;
+    font-size:1.3rem;
+    letter-spacing:6px;
+    text-align:center;
+    border-radius:10px;
+    border:1px solid #ced4da;
+}
+
+.box button{
+    margin-top:15px;
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    color:white;
+    background:#007bff;
+    cursor:pointer;
+}
+
+.box button:hover{
+    background:#0056b3;
+}
+
+.green{
+    color:green;
+    margin-bottom:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+<?php if(isset($_GET["ok"])): ?>
+    <p class="green">Código enviado</p>
+<?php endif; ?>
+
+<h2>Verificación</h2>
+
+<p>Revisa tu correo e ingresa el código</p>
+
+<form action="verificar_codigo.php" method="POST">
+
+<input type="text"
+       name="codigo"
+       maxlength="6"
+       required
+       placeholder="123456">
+
+<button type="submit">Verificar</button>
+
+</form>
+
+
+<form action="enviar_codigo.php" method="POST">
+
+<button type="submit" style="background:#28a745;">
+Reenviar código
+</button>
+
+</form>
+
+</div>
+
+</body>
+</html>
