@@ -35,14 +35,14 @@ $codigo = random_int(100000, 999999);
 $expira = date("Y-m-d H:i:s", time() + 300); // 5 minutos
 
 
-/* ================= LIMPIAR CÓDIGOS ANTERIORES ================= */
+/* ================= BORRAR CÓDIGOS ANTERIORES ================= */
 
 $sql = "DELETE FROM codigos_verificacion WHERE usuario_id = ?";
 $stmt = $db->prepare($sql);
 $stmt->execute([$user_id]);
 
 
-/* ================= GUARDAR CÓDIGO ================= */
+/* ================= GUARDAR NUEVO CÓDIGO ================= */
 
 $sql = "INSERT INTO codigos_verificacion (usuario_id, codigo, expira_en)
         VALUES (?,?,?)";
@@ -60,7 +60,7 @@ $stmt->execute([
 
 $service_id  = "service_z2iq85g";
 $template_id = "template_um7o5c8";
-$public_key  = "aYQj8l4hubsf4dk3f";
+$private_key = "JCgJzidrPl7ef0VbygXvJ"; // CAMBIAR LUEGO
 
 $url = "https://api.emailjs.com/api/v1.0/email/send";
 
@@ -68,15 +68,17 @@ $url = "https://api.emailjs.com/api/v1.0/email/send";
 /* ================= DATOS A ENVIAR ================= */
 
 $data = [
-    "service_id" => $service_id,
+
+    "service_id"  => $service_id,
     "template_id" => $template_id,
-    "user_id" => $public_key,
+    "user_id"     => $private_key,
 
     "template_params" => [
-        "to_email"  => $correo,
-        "to_name"   => $nombre,
-        "code"      => $codigo,
-        "from_name" => "Sistema Escolar"
+
+        "to_email" => $correo,
+        "to_name"  => $nombre,
+        "code"     => $codigo
+
     ]
 ];
 
@@ -92,8 +94,7 @@ curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    "Content-Type: application/json",
-    "Content-Length: " . strlen($payload)
+    "Content-Type: application/json"
 ]);
 
 $response = curl_exec($ch);
@@ -103,9 +104,14 @@ $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
 
-/* ================= VERIFICAR ENVÍO ================= */
+/* ================= VERIFICAR RESPUESTA ================= */
 
 if ($http_code !== 200) {
+
+    // DEBUG (si falla)
+    // echo $response;
+    // exit;
+
     die("Error al enviar el correo. Intenta más tarde.");
 }
 
