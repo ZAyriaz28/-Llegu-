@@ -6,6 +6,7 @@ session_start();
 //     header("Location:index.html");
 //     exit;
 // }
+?>
 
 <!DOCTYPE html>
 <html lang="es">
