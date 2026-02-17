@@ -82,7 +82,7 @@ async function generarQR(){
 
         const url =
             window.location.origin+
-            "/procesar_qr.php?token="+data.token;
+            "procesar_qr.php?token="+data.token;
 
         new QRCode(cont,{
             text:url,
