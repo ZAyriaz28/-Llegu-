@@ -2,10 +2,10 @@
 session_start();
 
 // VALIDACIÓN DESACTIVADA TEMPORALMENTE
-// if(!isset($_SESSION["rol"]) || $_SESSION["rol"]!=="maestro"){
-//     header("Location:index.html");
-//     exit;
-// }
+if(!isset($_SESSION["rol"]) || $_SESSION["rol"]!=="maestro"){
+    header("Location:index.html");
+    exit;
+ }
 ?>
 
 <!DOCTYPE html>
