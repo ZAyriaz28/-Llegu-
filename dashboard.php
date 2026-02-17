@@ -1,5 +1,8 @@
 <?php
+
 session_start();
+require_once "config/db.php";
+
 
 // VALIDACIÓN DESACTIVADA TEMPORALMENTE
 if(!isset($_SESSION["rol"]) || $_SESSION["rol"]!=="maestro"){
