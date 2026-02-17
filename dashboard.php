@@ -105,28 +105,34 @@ session_start();
                 </div>
             </div>
 
-            <div class="col-md-3">
-    <div class="card card-custom bg-white p-3 shadow-sm border-start border-success border-4">
-        <small class="text-muted fw-bold">ASISTENCIA HOY</small>
-        <h4 class="fw-bold">
-            <?php echo $porcentajeHoy; ?>%
-        </h4>
-        <div class="progress" style="height: 6px;">
-            <div class="progress-bar bg-success" style="width: <?php echo $porcentajeHoy; ?>%"></div>
-        </div>
-        <small class="text-muted" style="font-size: 0.7rem">
-            <?php echo $asistenciasHoy; ?> de <?php echo $totalAlumnos; ?> alumnos
-        </small>
-    </div>
-</div>
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="card card-custom bg-white p-3 shadow-sm border-start border-primary border-4">
+                        <small class="text-muted fw-bold">PROGRESO MÓDULO</small>
+                        <h4 class="fw-bold">65%</h4>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar" style="width: 65%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card card-custom bg-white p-3 shadow-sm border-start border-success border-4">
+                        <small class="text-muted fw-bold">ASISTENCIA PROMEDIO</small>
+                        <h4 class="fw-bold">92%</h4>
+                    </div>
+                </div>
                 <div class="col-md-3">
                     <div class="card card-custom bg-white p-3 shadow-sm border-start border-warning border-4">
                         <small class="text-muted fw-bold">PENDIENTES EVALUAR</small>
                         <h4 class="fw-bold">8</h4>
                     </div>
                 </div>
-                <small class="text-muted fw-bold">ALERTA DESERCIÓN</small>
-<h4 class="fw-bold"><?php echo $alertaDesercion; ?></h4>
+                <div class="col-md-3">
+                    <div class="card card-custom bg-white p-3 shadow-sm border-start border-danger border-4">
+                        <small class="text-muted fw-bold">ALERTA DESERCIÓN</small>
+                        <h4 class="fw-bold">2</h4>
+                    </div>
+                </div>
             </div>
 
             <div class="row g-4">
