@@ -72,7 +72,7 @@ switch($userData["rol"]){
         break;
 
     case "maestro":
-        header("Location: maestro.html");
+        header("Location: dashboard.php");
         break;
 
     case "estudiante":
