@@ -69,10 +69,10 @@ session_start();
             <div class="text-center mb-4">
                 <div class="bg-primary text-white rounded-circle d-inline-block p-3 mb-2">
                     <i class="bi bi-person-badge fs-3"></i>
-                </div>
-                <h6 class="fw-bold mb-0">Prof. Alexander G.</h6>
-                <small class="text-muted">Docente Técnico</small>
-            </div>
+               </div>
+    <h6 class="fw-bold mb-0"><?= $nombre; ?></h6>
+    <small class="text-muted">Docente Técnico</small>
+</div>
             <ul class="nav flex-column">
                 <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-grid-fill me-2"></i> Dashboard</a></li>
                 <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-journal-check me-2"></i> Calificaciones</a></li>
