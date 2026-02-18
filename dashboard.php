@@ -1,4 +1,4 @@
-.<?php
+<?php
 // 1. Iniciar sesión SIEMPRE al principio
 session_start();
 
