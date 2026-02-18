@@ -23,6 +23,7 @@ if(empty($usuario) || empty($clave)){
 $sql = "
 SELECT 
     u.id,
+    u.nombre, 
     u.usuario,
     u.password,
     r.nombre AS rol
