@@ -2,6 +2,8 @@
 // 1. Iniciar sesión SIEMPRE al principio
 session_start();
 
+require_once "config/auth.php";
+
 // 2. Validación
 if(!isset($_SESSION["rol"]) || $_SESSION["rol"] !== "maestro"){
     header("Location: index.html");
