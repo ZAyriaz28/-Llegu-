@@ -83,7 +83,7 @@ $nombre = $_SESSION["nombre"]
                 <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-journal-check me-2"></i> Calificaciones</a></li>
                 <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-folder me-2"></i> Unidades</a></li>
                 <li class="nav-item"><hr class="dropdown-divider"></li>
-                <li class="nav-item"><a class="nav-link text-danger" href="index.html"><i class="bi bi-box-arrow-left me-2"></i> Salir</a></li>
+                <li class="nav-item"><a class="nav-link text-danger" href="logout.php"><i class="bi bi-box-arrow-left me-2"></i> Salir</a></li>
             </ul>
         </nav>
 
