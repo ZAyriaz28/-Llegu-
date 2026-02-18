@@ -6,10 +6,11 @@ session_start();
 if(!isset($_SESSION["rol"]) || $_SESSION["rol"] !== "maestro"){
     header("Location: index.html");
     exit;
+} 
 
 $nombre = $_SESSION["nombre"]
 
-}
+
     ?>
     
 <!DOCTYPE html>
