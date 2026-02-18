@@ -9,11 +9,12 @@ require_once "config/db.php";
 
 $usuario = $_POST["user"] ?? "";
 $clave   = $_POST["pass"] ?? "";
+$rolForm = $_POST["rol"] ?? ""; // ROL SELECCIONADO
 
 
 /* ========= VALIDAR ========= */
 
-if(empty($usuario) || empty($clave)){
+if(empty($usuario) || empty($clave) || empty($rolForm)){
     die("Complete todos los campos");
 }
 
@@ -57,6 +58,15 @@ if(!password_verify($clave, $userData["password"])){
 }
 
 
+/* ========= VALIDAR ROL ========= */
+
+if($rolForm !== $userData["rol"]){
+
+    die("Tu cuenta no pertenece al rol seleccionado");
+
+}
+
+
 /* ========= SESIÓN ========= */
 
 $_SESSION["id"]      = $userData["id"];
@@ -78,7 +88,7 @@ switch($userData["rol"]){
         break;
 
     case "estudiante":
-        header("Location: estudiante.html");
+        header("Location: estudiante.php");
         break;
 
     default:
