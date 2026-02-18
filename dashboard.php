@@ -7,6 +7,13 @@ if(!isset($_SESSION["rol"]) || $_SESSION["rol"] !== "maestro"){
     header("Location: index.html");
     exit;
 }
+    /* ================== DATOS DEL DOCENTE ================== */
+
+$nombre = isset($_SESSION["nombre"]) 
+    ? htmlspecialchars($_SESSION["nombre"]) 
+    : "Docente";
+/* Obtener nombre */
+$nombre = $_SESSION["nombre"];
 ?>
 //?>
 
