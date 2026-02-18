@@ -73,7 +73,7 @@ if(!isset($_SESSION["rol"]) || $_SESSION["rol"]!=="maestro"){
                 <div class="bg-primary text-white rounded-circle d-inline-block p-3 mb-2">
                     <i class="bi bi-person-badge fs-3"></i>
                </div>
-    <h6 class="fw-bold mb-0"><?= $user; ?></h6>
+    <h6 class="fw-bold mb-0"><?= $nombre; ?></h6>
     <small class="text-muted">Docente Técnico</small>
 </div>
             <ul class="nav flex-column">
