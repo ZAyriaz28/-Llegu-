@@ -7,6 +7,8 @@ if(!isset($_SESSION["rol"]) || $_SESSION["rol"] !== "maestro"){
     header("Location: index.html");
     exit;
 }
+    ?>
+    
 <!DOCTYPE html>
 <html lang="es">
 <head>
