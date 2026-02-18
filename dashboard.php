@@ -1,15 +1,16 @@
 <?php
-
 session_start();
 require_once "config/db.php";
 
-
-// VALIDACIÓN DESACTIVADA TEMPORALMENTE
-if(!isset($_SESSION["rol"]) || $_SESSION["rol"]!=="maestro"){
-    header("Location:index.html");
+/* Validar maestro */
+if(!isset($_SESSION["rol"]) || $_SESSION["rol"] !== "maestro"){
+    header("Location: index.html");
     exit;
-    $nombre = $user["nombre"];
- }
+}
+
+/* Obtener nombre */
+$nombre = $_SESSION["nombre"] ?? "Docente";
+
 ?>
 
 <!DOCTYPE html>
