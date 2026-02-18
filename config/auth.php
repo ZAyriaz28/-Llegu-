@@ -1,13 +1,16 @@
 <?php
-session_start();
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 require_once "config/db.php";
 
 /* ========= SI NO HAY SESIÓN ========= */
 
-if(!isset($_SESSION["id"])){
+if (!isset($_SESSION["id"])) {
 
-    /* ========= SI EXISTE COOKIE ========= */
-    if(isset($_COOKIE["remember_token"])){
+    if (isset($_COOKIE["remember_token"])) {
 
         $sql = "SELECT u.id, u.usuario, u.nombre, r.nombre AS rol
                 FROM usuarios u
@@ -22,17 +25,14 @@ if(!isset($_SESSION["id"])){
 
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if($user){
+        if ($user) {
 
-            // Restaurar sesión
             $_SESSION["id"]      = $user["id"];
             $_SESSION["usuario"] = $user["usuario"];
             $_SESSION["rol"]     = $user["rol"];
             $_SESSION["nombre"]  = $user["nombre"];
 
         } else {
-
-            // Token inválido → borrar cookie
             setcookie("remember_token", "", time() - 3600, "/");
         }
     }
@@ -40,7 +40,7 @@ if(!isset($_SESSION["id"])){
 
 /* ========= SI AÚN NO HAY SESIÓN ========= */
 
-if(!isset($_SESSION["id"])){
+if (!isset($_SESSION["id"])) {
     header("Location: index.php");
-    exit;
+    exit();
 }
