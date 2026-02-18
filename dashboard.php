@@ -8,6 +8,7 @@ require_once "config/db.php";
 if(!isset($_SESSION["rol"]) || $_SESSION["rol"]!=="maestro"){
     header("Location:index.html");
     exit;
+    $nombre = $user["nombre"];
  }
 ?>
 
