@@ -9,7 +9,7 @@ if(!isset($_SESSION["rol"]) || $_SESSION["rol"] !== "maestro"){
 }
 
 /* Obtener nombre */
-$nombre = $_SESSION["nombre"] ?? "Docente";
+$nombre = $_SESSION["nombre"] ;
 
 ?>
 
