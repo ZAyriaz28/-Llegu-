@@ -1,13 +1,15 @@
 // VALIDACIÓN DESACTIVADA TEMPORALMENTE
-if(!isset($_SESSION["rol"]) || $_SESSION["rol"]!=="maestro"){
-    header("Location:index.html");
+<?php
+// 1. Iniciar sesión SIEMPRE al principio
+session_start();
+
+// 2. Validación (Descoméntala cuando confirmes que el archivo carga)
+if(!isset($_SESSION["rol"]) || $_SESSION["rol"] !== "maestro"){
+    header("Location: index.html");
     exit;
- }
-if(!isset($_SESSION["rol"]) || $_SESSION["rol"]!=="maestro"){
-    header("Location:index.html");
-    exit;
- }
+}
 ?>
+//?>
 
 <!DOCTYPE html>
 <html lang="es">
