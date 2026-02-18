@@ -4,20 +4,17 @@ session_start();
 /* ========= CONEXIÓN ========= */
 require_once "config/db.php";
 
-
 /* ========= DATOS FORM ========= */
 
 $usuario = $_POST["user"] ?? "";
 $clave   = $_POST["pass"] ?? "";
-$rolForm = $_POST["rol"] ?? ""; // ROL SELECCIONADO
-
+$rolForm = $_POST["rol"] ?? "";
 
 /* ========= VALIDAR ========= */
 
 if(empty($usuario) || empty($clave) || empty($rolForm)){
     die("Complete todos los campos");
 }
-
 
 /* ========= CONSULTA ========= */
 
@@ -43,13 +40,11 @@ $stmt->execute([
 
 $userData = $stmt->fetch(PDO::FETCH_ASSOC);
 
-
 /* ========= EXISTE ========= */
 
 if(!$userData){
     die("Usuario no encontrado o no verificado");
 }
-
 
 /* ========= PASSWORD ========= */
 
@@ -57,15 +52,11 @@ if(!password_verify($clave, $userData["password"])){
     die("Contraseña incorrecta");
 }
 
-
 /* ========= VALIDAR ROL ========= */
 
 if($rolForm !== $userData["rol"]){
-
     die("Tu cuenta no pertenece al rol seleccionado");
-
 }
-
 
 /* ========= SESIÓN ========= */
 
@@ -74,6 +65,32 @@ $_SESSION["usuario"] = $userData["usuario"];
 $_SESSION["rol"]     = $userData["rol"];
 $_SESSION["nombre"]  = $userData["nombre"];
 
+/* ========= COOKIE RECORDAR ========= */
+
+if(isset($_POST["recordar"])){
+
+    // Generar token seguro
+    $token = bin2hex(random_bytes(32));
+
+    // Guardar token en BD
+    $sqlToken = "UPDATE usuarios SET remember_token = :token WHERE id = :id";
+    $stmtToken = $db->prepare($sqlToken);
+    $stmtToken->execute([
+        ":token" => $token,
+        ":id" => $userData["id"]
+    ]);
+
+    // Crear cookie válida por 30 días
+    setcookie(
+        "remember_token",
+        $token,
+        time() + (86400 * 30), // 30 días
+        "/",
+        "",
+        false,
+        true // HttpOnly
+    );
+}
 
 /* ========= REDIRECCIÓN ========= */
 
