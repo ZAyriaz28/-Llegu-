@@ -2,21 +2,11 @@
 // 1. Iniciar sesión SIEMPRE al principio
 session_start();
 
-// 2. Validación (Descoméntala cuando confirmes que el archivo carga)
+// 2. Validación
 if(!isset($_SESSION["rol"]) || $_SESSION["rol"] !== "maestro"){
     header("Location: index.html");
     exit;
 }
-    /* ================== DATOS DEL DOCENTE ================== */
-
-$nombre = isset($_SESSION["nombre"]) 
-    ? htmlspecialchars($_SESSION["nombre"]) 
-    : "Docente";
-/* Obtener nombre */
-$nombre = $_SESSION["nombre"];
-?>
-//?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -26,8 +16,7 @@ $nombre = $_SESSION["nombre"];
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="style-global.css">
-
+    
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -78,10 +67,10 @@ $nombre = $_SESSION["nombre"];
             <div class="text-center mb-4">
                 <div class="bg-primary text-white rounded-circle d-inline-block p-3 mb-2">
                     <i class="bi bi-person-badge fs-3"></i>
-               </div>
-    <h6 class="fw-bold mb-0"><?= $nombre; ?></h6>
-    <small class="text-muted">Docente Técnico</small>
-</div>
+                </div>
+                <h6 class="fw-bold mb-0"><?php echo $nombre; ?></h6>
+                <small class="text-muted">Docente Técnico</small>
+            </div>
             <ul class="nav flex-column">
                 <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-grid-fill me-2"></i> Dashboard</a></li>
                 <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-journal-check me-2"></i> Calificaciones</a></li>
@@ -100,21 +89,24 @@ $nombre = $_SESSION["nombre"];
                     </button>
                     <button class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel me-1"></i> Exportar</button>
                 </div>
-                <div class="card border-0 shadow-sm p-3 bg-white rounded-4 mb-3">
-                    <h6 class="fw-bold mb-3"><i class="bi bi-geo-alt-fill text-danger"></i> Perímetro de Seguridad</h6>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="checkGeo" checked>
-                        <label class="form-check-label small" for="checkGeo">Restringir por ubicación (50m)</label>
-                    </div>
-                    <div class="mt-2">
-                        <small class="text-muted" style="font-size: 0.7rem;">
-                            Ubicación actual: <strong>Centro Tecnológico</strong>
-                        </small>
-                    </div>
-                </div>
             </div>
 
             <div class="row g-3 mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm p-3 bg-white rounded-4 mb-3">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-geo-alt-fill text-danger"></i> Perímetro de Seguridad</h6>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="checkGeo" checked>
+                            <label class="form-check-label small" for="checkGeo">Restringir por ubicación (50m)</label>
+                        </div>
+                        <div class="mt-2">
+                            <small class="text-muted" style="font-size: 0.7rem;">
+                                Ubicación actual: <strong>Centro Tecnológico</strong>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="col-md-3">
                     <div class="card card-custom bg-white p-3 shadow-sm border-start border-primary border-4">
                         <small class="text-muted fw-bold">PROGRESO MÓDULO</small>
@@ -221,18 +213,14 @@ $nombre = $_SESSION["nombre"];
                 <h5 class="modal-title fw-bold text-primary w-100">Escanea para Asistencia</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
-
             <div class="modal-body d-flex flex-column align-items-center justify-content-center">
                 <div id="contenedorQR" class="mb-3 p-3 border rounded bg-light d-flex justify-content-center align-items-center" style="min-height: 220px; min-width: 220px;"></div>
-
                 <h6 class="fw-bold text-dark mb-1">Técnico Superior A1</h6>
                 <p class="text-muted small mb-0" id="fechaQR">Generando...</p>
-
                 <div class="mt-3 badge bg-danger bg-opacity-10 text-danger border border-danger blink-animation">
                     <i class="bi bi-broadcast"></i> EMITIENDO SEÑAL
                 </div>
             </div>
-
             <div class="modal-footer border-0 justify-content-center">
                 <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">
                     Finalizar Sesión
@@ -247,31 +235,17 @@ $nombre = $_SESSION["nombre"];
 
 <script>
     function generarQR() {
-        console.log("Iniciando generación de QR...");
-
-        // 1. Obtener contenedor y limpiarlo
         const contenedor = document.getElementById("contenedorQR");
-        if(!contenedor) {
-            alert("Error: No se encontró el contenedor del QR");
-            return;
-        }
+        if(!contenedor) return;
         contenedor.innerHTML = ""; 
 
-        // 2. Detectar ruta base (localhost o dominio)
         let baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
-
-        // 3. Preparar datos
         const idClase = "Tecnico-A1"; 
-        const fecha = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        const fecha = new Date().toISOString().split('T')[0]; 
 
-        // 4. Crear URL de asistencia
         const urlAsistencia = `${baseUrl}/procesar_qr.php?clase=${idClase}&fecha=${fecha}`;
-        console.log("URL Generada:", urlAsistencia);
-
-        // 5. Actualizar fecha visible
         document.getElementById("fechaQR").innerText = new Date().toLocaleString();
 
-        // 6. Generar QR
         try {
             new QRCode(contenedor, {
                 text: urlAsistencia,
@@ -282,16 +256,13 @@ $nombre = $_SESSION["nombre"];
                 correctLevel : QRCode.CorrectLevel.M
             });
         } catch (e) {
-            console.error("Error librería QR:", e);
-            contenedor.innerHTML = "<p class='text-danger'>Error al cargar librería QR. Revisa tu conexión a internet.</p>";
+            contenedor.innerHTML = "<p class='text-danger'>Error al cargar QR.</p>";
         }
 
-        // 7. Mostrar Modal
         const modalEl = document.getElementById('modalAsistencia');
         const modal = new bootstrap.Modal(modalEl);
         modal.show();
     }
 </script>
-
 </body>
 </html>
