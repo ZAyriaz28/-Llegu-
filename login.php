@@ -61,7 +61,7 @@ if(!password_verify($clave, $userData["password"])){
 $_SESSION["id"]      = $userData["id"];
 $_SESSION["usuario"] = $userData["usuario"];
 $_SESSION["rol"]     = $userData["rol"];
-$userData["nombre"];
+$_SESSION["nombre"]  = $userData["nombre"];
 
 
 /* ========= REDIRECCIÓN ========= */
