@@ -1,9 +1,8 @@
 <?php
-
 require_once "config/db.php";
 require_once "config/auth.php";
 
-/* Validar rol (auth.php ya valida sesión) */
+/* Validar rol */
 if (($_SESSION["rol"] ?? "") !== "estudiante") {
     header("Location: /index.php");
     exit();
@@ -12,24 +11,30 @@ if (($_SESSION["rol"] ?? "") !== "estudiante") {
 $usuario_id = (int) $_SESSION["id"];
 $nombre     = $_SESSION["nombre"];
 
-/* Obtener total de clases y asistencias del estudiante en una sola ejecución lógica */
-
-// Total clases registradas en el sistema
+/* 1. Obtener total de clases */
 $totalClases = (int) $db
     ->query("SELECT COUNT(DISTINCT fecha) FROM asistencias")
     ->fetchColumn();
 
-// Total asistencias del estudiante
+/* 2. Total asistencias del estudiante */
 $stmt = $db->prepare("SELECT COUNT(*) FROM asistencias WHERE usuario_id = :id");
 $stmt->execute([":id" => $usuario_id]);
 $asistidas = (int) $stmt->fetchColumn();
 
-/*  Calcular porcentaje */
-$porcentaje = $totalClases > 0
-    ? round(($asistidas / $totalClases) * 100)
-    : 0;
+/* 3. Calcular porcentaje */
+$porcentaje = $totalClases > 0 ? round(($asistidas / $totalClases) * 100) : 0;
+
+/* 4. VERIFICAR SI YA ASISTIÓ HOY (Esto corrige el error) */
+$hoy = date('Y-m-d');
+$stmtCheck = $db->prepare("SELECT COUNT(*) FROM asistencias WHERE usuario_id = :id AND fecha = :fecha");
+$stmtCheck->execute([
+    ":id"    => $usuario_id, 
+    ":fecha" => $hoy
+]);
+$yaRegistroHoy = ($stmtCheck->fetchColumn() > 0);
 
 ?>
+
 
 <!DOCTYPE html>
 <html lang="es">
