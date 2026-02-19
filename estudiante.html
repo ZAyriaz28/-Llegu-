@@ -1,177 +1,337 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Estudiante - INATEC</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+        rel="stylesheet">
+
     <style>
+        :root {
+            --primary: #0061ff;
+            --accent: #60efff;
+            --bg-light: #f4f7fe;
+            --card-bg: #ffffff;
+            --text-main: #1b2559;
+        }
+
+        body.dark-mode {
+            --bg-light: #0b1437;
+            --card-bg: #111c44;
+            --text-main: #ffffff;
+        }
+
         body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #004a99 0%, #007bff 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 15px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-light);
             margin: 0;
+            overflow-x: hidden;
+            transition: background 0.3s ease;
         }
 
-        .student-container {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 2rem;
-            border-radius: 25px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        /* Pantalla de Carga (Splash Screen) */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 450px;
-            text-align: center;
-        }
-
-        .alert-custom {
-            font-size: 0.8rem;
-            border-radius: 12px;
-            background: #fff3cd;
-            color: #856404;
-            padding: 12px;
-            border: 1px solid #ffeeba;
-            margin-bottom: 1.5rem;
-        }
-
-        .clase-card {
-            background: #ffffff;
-            border: 1px solid #e9ecef;
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        /* ESTILO DEL BOTÓN QUE FALTABA */
-        .btn-check {
-            background-color: #004a99;
-            border: none;
-            border-radius: 50%;
-            width: 130px;
-            height: 130px;
-            font-weight: 600;
-            color: white;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 20px rgba(0, 74, 153, 0.4);
-            display: inline-flex;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            cursor: pointer;
-            text-decoration: none;
+            z-index: 2000;
+            color: white;
+            transition: opacity 0.5s ease, visibility 0.5s;
         }
 
-        .btn-check:hover {
-            transform: scale(1.08);
-            background-color: #003366;
+        /* Header de Pantalla Completa */
+        .header-gradient {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            height: 220px;
+            border-radius: 0 0 40px 40px;
+            padding: 40px 25px;
             color: white;
         }
 
-        .btn-check:active {
-            transform: scale(0.95);
+        .main-content {
+            max-width: 600px;
+            /* Un poco más ancho para mejor lectura */
+            margin: -60px auto 0;
+            padding: 0 20px 100px;
         }
 
-        .btn-check i {
-            font-size: 2.5rem;
-            margin-bottom: 5px;
+        .glass-card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+            color: var(--text-main);
         }
 
-        .historial-item {
+        /* Botón QR Flotante */
+        .qr-fab {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 50%;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            position: fixed;
+            bottom: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid var(--bg-light);
+            z-index: 1001;
+            box-shadow: 0 10px 20px rgba(0, 97, 255, 0.3);
+            cursor: pointer;
         }
 
-        .badge-presente { background-color: #198754; color: white; padding: 5px 10px; border-radius: 8px; font-size: 0.75rem; }
-        .badge-falta { background-color: #dc3545; color: white; padding: 5px 10px; border-radius: 8px; font-size: 0.75rem; }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: var(--card-bg);
+            height: 75px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-item {
+            color: #a3aed0;
+            text-align: center;
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .qr-fab.bg-success {
+    animation: scaleIn 0.3s ease-in-out;
+}
+
+@keyframes scaleIn {
+    from { transform: translateX(-50%) scale(0); }
+    to { transform: translateX(-50%) scale(1); }
+}
     </style>
 </head>
+
 <body>
 
-<div class="student-container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <small class="text-muted fw-bold">ID: 2024-0012NI</small>
-        <a href="index.html" class="text-danger text-decoration-none fw-bold small">
-            <i class="bi bi-box-arrow-right"></i> Salir
-        </a>
+    <div id="splash-screen">
+        <div class="spinner-border mb-3" role="status"></div>
+        <h4 class="fw-bold">INATEC Somoto</h4>
+        <p class="small opacity-75">Cargando tu portal...</p>
     </div>
 
-    <h4 class="fw-bold mb-0">Juan Pérez</h4>
-    <p class="text-muted small mb-4">Estudiante Técnico</p>
-
-    <div class="alert-custom">
-        <i class="bi bi-exclamation-triangle-fill"></i> Tienes 1 inasistencia acumulada en este módulo.
-    </div>
-
-    <div class="clase-card shadow-sm">
-        <small class="text-muted fw-bold d-block mb-1">CLASE ACTIVA</small>
-        <h5 class="fw-bold text-dark mb-2">Ciberseguridad y Redes</h5>
-        <p class="small text-primary mb-0">
-            <i class="bi bi-geo-alt-fill"></i> Centro Tecnológico - Aula 5
-        </p>
-    </div>
-
-    <div class="mb-4">
-        <button class="btn btn-check" id="btnEscanear" onclick="intentarAsistencia()">
-            <i class="bi bi-camera"></i>
-            <span style="font-size: 0.75rem;">ESCANEAR</span>
-        </button>
-        <p class="small text-muted mt-3">Toca para escanear el QR del docente</p>
-    </div>
-
-    <hr class="my-4">
-
-    <div class="text-start">
-        <h6 class="fw-bold mb-3 small text-uppercase">Mi historial reciente:</h6>
-        <div class="historial-item">
-            <small>Ayer - Diseño Web</small>
-            <span class="badge-presente">Presente</span>
+    <div class="header-gradient">
+        <div class="d-flex justify-content-between align-items-center max-width-container mx-auto"
+            style="max-width: 600px;">
+            <div>
+                <h4 class="fw-bold mb-0">¡Hola, <span id="userName">Juan</span>! 👋</h4>
+                <p class="small opacity-75 mb-0">Estudiante Técnico</p>
+            </div>
+            <button class="btn text-white p-0" id="btnDarkMode">
+                <i class="bi bi-moon-stars fs-3"></i>
+            </button>
         </div>
-        <div class="historial-item">
-            <small>08 Feb - Programación</small>
-            <span class="badge-falta">Falta</span>
+    </div>
+
+    <div class="main-content">
+        <div id="tab-home" class="tab-content active">
+            <div class="glass-card mb-4 text-center">
+                <h6 class="text-muted small fw-bold">PROGRESO DE ASISTENCIA</h6>
+                <h2 class="fw-bold text-primary">85%</h2>
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar" style="width: 85%"></div>
+                </div>
+            </div>
+
+            <h6 class="fw-bold mb-3 ms-2">TU CLASE DE HOY</h6>
+            <div class="glass-card border-start border-primary border-4">
+                <h5 class="fw-bold mb-1">Ciberseguridad y Redes</h5>
+                <p class="small text-muted mb-0"><i class="bi bi-geo-alt-fill text-primary"></i> Centro Tecnológico -
+                    Somoto</p>
+            </div>
+        </div>
+
+        <div id="tab-horario" class="tab-content">
+            <h5 class="fw-bold mb-3">Horario Semanal</h5>
+            <div class="glass-card">
+                <div class="d-flex justify-content-between">
+                    <span><strong>Lunes:</strong> Diseño Web</span>
+                    <span class="text-primary">08:00 AM</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   <div class="qr-fab bg-success border-success" id="btnAsistenciaCheck" onclick="confirmarFinalizado()" style=" background: linear-gradient(135deg, var(--primary), var(--accent)); border: 5px solid var(--bs-primary);">
+    <i class="bi bi-check-lg"></i>
+</div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="changeTab('home', this)">
+            <i class="bi bi-house-door-fill fs-4"></i>
+            <div style="font-size: 0.65rem;">Inicio</div>
+        </div>
+        <div class="nav-item" onclick="changeTab('horario', this)">
+            <i class="bi bi-calendar-week fs-4"></i>
+            <div style="font-size: 0.65rem;">Horario</div>
+        </div>
+        <div style="flex: 1;"></div>
+        <div class="nav-item" data-bs-toggle="offcanvas" data-bs-target="#panelPerfil" aria-controls="panelPerfil">
+            <i class="bi bi-person-circle fs-4"></i>
+            <div style="font-size: 0.65rem;">Perfil</div>
+        </div>
+        <div class="offcanvas offcanvas-end border-0" tabindex="-1" id="panelPerfil" aria-labelledby="panelPerfilLabel" style="width: 85%; border-radius: 25px 0 0 25px; background: var(--card-bg); color: var(--text-main);">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title fw-bold" id="panelPerfilLabel">Mi Perfil</h5>
+        <button type="button" class="btn-close shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="text-center mb-4">
+            <div id="avatarPanel" class="mx-auto mb-2 shadow-sm" style="width: 80px; height: 80px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.8rem;">
+                JP
+            </div>
+            <h5 class="fw-bold mb-0" id="nombrePanelDisplay">Juan Pérez</h5>
+            <small class="text-muted">Estudiante INATEC</small>
+        </div>
+
+        <hr class="opacity-10">
+
+        <div class="mb-3">
+            <label class="form-label small fw-bold">Nombre Completo</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-0"><i class="bi bi-person"></i></span>
+                <input type="text" id="inputNombre" class="form-control bg-light border-0" placeholder="Escribe tu nombre">
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label small fw-bold">Centro Tecnológico</label>
+            <input type="text" class="form-control bg-light border-0" value="Somoto, Madriz" disabled>
+        </div>
+
+        <button class="btn btn-primary w-100 rounded-pill py-2 fw-bold" onclick="guardarCambiosPerfil()">
+            <i class="bi bi-check-lg me-2"></i>Guardar Cambios
+        </button>
+
+        <div class="mt-5 text-center">
+            <p class="small text-muted mb-0">ID: 2024-0012NI</p>
+            <p class="small text-muted">Versión 2.1.0</p>
         </div>
     </div>
 </div>
+        <div class="nav-item" onclick="window.location.href='index.html'">
+            <i class="bi bi-box-arrow-right fs-4"></i>
+            <div style="font-size: 0.65rem;">Salir</div>
+        </div>
+    </div>
 
-<script src="Geolocalizacion-API.js"></script>
+    <script>
+        // Quitar Splash Screen después de 3 segundos
+        setTimeout(() => {
+            const splash = document.getElementById('splash-screen');
+            splash.style.opacity = '0';
+            setTimeout(() => splash.style.visibility = 'hidden', 500);
+        }, 3000);
 
-<script>
-    async function intentarAsistencia() {
-        const btn = document.getElementById('btnEscanear');
-        
-        try {
-            // Estado de carga
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span><br><small style="font-size:0.6rem">GPS...</small>';
-
-            // Validar ubicación con tu Geolocalizacion-API.js
-            const resultado = await validarUbicacionEstudiante();
-            
-            if (resultado.valido) {
-                alert("📍 Ubicación verificada: Estás en el Centro Tecnológico.\n\nAbriendo cámara...");
-                // Aquí llamarías a la función de tu librería QR
-            }
-
-        } catch (error) {
-            // Error si está fuera de rango o sin permiso
-            alert("❌ ACCESO DENEGADO\n" + error);
-        } finally {
-            // Restaurar botón
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-camera"></i><span style="font-size: 0.75rem;">ESCANEAR</span>';
+        // Función para cambiar pestañas
+        function changeTab(tabName, el) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.add('active');
+            el.classList.add('active');
         }
-    }
-</script>
+        let contadorMensajes = 0; // Variable global para llevar el control
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+function confirmarFinalizado() {
+    // Si ya se mostraron 3 mensajes, no hacer nada
+    if (contadorMensajes >= 3) {
+        return; 
+
+    }
+    const toastContainer = document.querySelector('.toast-container');
+    const mensajeHTML = `
+        <div class="toast align-items-center text-white bg-primary border-0 rounded-4 shadow" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-info-circle-fill me-2"></i> Asistencia ya registrada.
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>`;
+    
+    // Insertar el mensaje
+    toastContainer.insertAdjacentHTML('beforeend', mensajeHTML);
+    
+    // Obtener el último mensaje insertado y mostrarlo
+    const elementoToast = toastContainer.lastElementChild;
+    const nuevoToast = new bootstrap.Toast(elementoToast, { delay: 1500 });
+    nuevoToast.show();
+
+    // Sumar al contador
+    contadorMensajes++;
+
+    // Opcional: Eliminar el elemento del HTML cuando se oculte para limpiar el código
+    elementoToast.addEventListener('hidden.bs.toast', () => {
+        elementoToast.remove();
+    });
+}
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="modo-oscuro.js"></script>
+    <script src="Geolocalizacion-API.js"></script>
+    <script src="guardarCambiosPerfil.js"></script>
+
+    <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 2000;">
+    <div id="toastAsistencia" class="toast align-items-center text-white bg-primary border-0 rounded-4 shadow" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-info-circle-fill me-2"></i> Asistencia ya registrada correctamente.
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
 </body>
+
 </html>
