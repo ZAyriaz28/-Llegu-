@@ -34,23 +34,40 @@ if (isset($_SESSION["id"])) {
         :root {
             --primary-blue: #004a99;
             --tech-cyan: #00d4ff;
+            /* Valores por defecto (Dark Mode) */
+            --bg-gradient: radial-gradient(circle at top right, #002f61, #000b1a);
             --glass-bg: rgba(255, 255, 255, 0.12);
             --glass-border: rgba(255, 255, 255, 0.2);
+            --text-main: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.7);
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --shadow-color: rgba(0, 0, 0, 0.4);
+        }
+
+        /* Variables para Modo Claro (Light Mode) */
+        [data-theme="light"] {
+            --bg-gradient: radial-gradient(circle at top right, #e0eafc, #cfdef3);
+            --glass-bg: rgba(255, 255, 255, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --text-main: #1a2a3a;
+            --text-muted: #5a6a7a;
+            --input-bg: rgba(255, 255, 255, 0.8);
+            --shadow-color: rgba(0, 0, 0, 0.1);
         }
 
         body {
             font-family: 'Poppins', sans-serif;
-            /* Gradiente Tecnológico Profundo */
-            background: radial-gradient(circle at top right, #002f61, #000b1a);
+            background: var(--bg-gradient);
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0;
             overflow: hidden;
+            transition: background 0.5s ease;
         }
 
-        /* Efecto de Luces de Fondo (Opcional, muy atractivo) */
+        /* Luces de fondo dinámicas */
         body::before {
             content: "";
             position: absolute;
@@ -64,6 +81,37 @@ if (isset($_SESSION["id"])) {
             z-index: -1;
         }
 
+        /* Botón de cambio de tema */
+        .theme-switch-wrapper {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            z-index: 1000;
+        }
+
+        .btn-theme {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 8px 32px var(--shadow-color);
+        }
+
+        .btn-theme:hover {
+            transform: scale(1.1) rotate(15deg);
+            border-color: var(--tech-cyan);
+        }
+
+        /* Contenedor Login */
         .login-container {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
@@ -71,17 +119,18 @@ if (isset($_SESSION["id"])) {
             border: 1px solid var(--glass-border);
             padding: 2.5rem 2rem;
             border-radius: 24px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 25px 50px var(--shadow-color);
             width: 95%;
             max-width: 400px;
-            color: white;
+            color: var(--text-main);
+            transition: all 0.5s ease;
         }
 
         .inatec-logo {
             font-weight: 600;
             font-size: 1.8rem;
             text-align: center;
-            background: linear-gradient(to right, #fff, var(--tech-cyan));
+            background: linear-gradient(to right, var(--text-main), var(--tech-cyan));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 0.2rem;
@@ -89,7 +138,7 @@ if (isset($_SESSION["id"])) {
 
         .sub-title {
             text-align: center;
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--text-muted);
             font-size: 0.85rem;
             margin-bottom: 2rem;
             letter-spacing: 1px;
@@ -98,29 +147,30 @@ if (isset($_SESSION["id"])) {
 
         /* Inputs Estilizados */
         .form-label {
-            color: rgba(255, 255, 255, 0.9);
+            color: var(--text-main);
             font-size: 0.85rem;
             margin-left: 5px;
+            opacity: 0.9;
         }
 
         .form-control, .form-select {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--input-bg);
+            border: 1px solid var(--glass-border);
             border-radius: 12px;
             padding: 0.75rem 1rem;
-            color: white;
+            color: var(--text-main) !important;
             transition: all 0.3s ease;
         }
 
         .form-control:focus, .form-select:focus {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--glass-bg);
             border-color: var(--tech-cyan);
-            color: white;
             box-shadow: 0 0 15px rgba(0, 212, 255, 0.25);
         }
 
         .form-control::placeholder {
-            color: rgba(255, 255, 255, 0.3);
+            color: var(--text-muted);
+            opacity: 0.5;
         }
 
         /* Botón Pro */
@@ -132,6 +182,7 @@ if (isset($_SESSION["id"])) {
             font-weight: 600;
             margin-top: 1rem;
             box-shadow: 0 10px 20px rgba(0, 74, 153, 0.3);
+            transition: 0.3s;
         }
 
         .btn-primary:hover {
@@ -140,7 +191,7 @@ if (isset($_SESSION["id"])) {
             background: linear-gradient(135deg, #0056b3 0%, var(--tech-cyan) 100%);
         }
 
-        /* Personalización del Toggle Password */
+        /* Password Wrapper */
         .password-wrapper { position: relative; }
         .toggle-icon {
             position: absolute;
@@ -149,17 +200,21 @@ if (isset($_SESSION["id"])) {
             transform: translateY(-50%);
             border: none;
             background: none;
-            color: rgba(255, 255, 255, 0.5);
+            color: var(--text-muted);
             transition: 0.3s;
         }
-        .toggle-icon.active-blue { color: var(--tech-cyan) !important; }
 
         .footer-text {
             text-align: center;
             margin-top: 2rem;
             font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.4);
+            color: var(--text-muted);
+            opacity: 0.6;
         }
+
+        /* Estilo para los options del select */
+        option { background: white; color: black; }
+        [data-theme="dark"] option { background: #001a33; color: white; }
 
         .login-error-alert {
             background: rgba(220, 53, 69, 0.2);
@@ -170,13 +225,16 @@ if (isset($_SESSION["id"])) {
             font-size: 0.85rem;
             margin-bottom: 1rem;
         }
-        
-        /* Ajuste para opciones del select (fondo oscuro) */
-        option { background: #001a33; color: white; }
     </style>
 </head>
 
 <body>
+    <div class="theme-switch-wrapper animate__animated animate__fadeIn">
+        <button id="theme-toggle" class="btn-theme">
+            <i id="theme-icon" class="bi bi-moon-stars-fill"></i>
+        </button>
+    </div>
+
     <div class="login-container animate__animated animate__fadeInUp">
         <div class="inatec-logo">Sistema Educativo</div>
         <div class="sub-title">Tecnológico Nacional</div>
@@ -217,7 +275,7 @@ if (isset($_SESSION["id"])) {
             <div class="mb-4 d-flex align-items-center justify-content-between">
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="recordar" name="recordar">
-                    <label class="form-check-label small text-white-50" for="recordar">Recordarme</label>
+                    <label class="form-check-label small" for="recordar" style="color: var(--text-muted);">Recordarme</label>
                 </div>
                 <a href="recordarme.php" class="small text-decoration-none" style="color: var(--tech-cyan);">¿Qué es esto?</a>
             </div>
@@ -225,7 +283,7 @@ if (isset($_SESSION["id"])) {
             <button type="submit" class="btn btn-primary w-100">Entrar al Sistema</button>
 
             <div class="text-center mt-3">
-                <span class="small text-white-50">¿Nuevo aquí?</span>
+                <span class="small" style="color: var(--text-muted);">¿Nuevo aquí?</span>
                 <a href="crear-cuenta.html" class="text-decoration-none small fw-bold ms-1" style="color: var(--tech-cyan);">Crear Cuenta</a>
             </div>
         </form>
@@ -235,5 +293,6 @@ if (isset($_SESSION["id"])) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="viewpassword.js"></script>
+    <script src="theme-loader.js"></script>
 </body>
 </html>
