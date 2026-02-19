@@ -1,23 +1,46 @@
 <?php
-
 require_once "config/auth.php";
+require_once "config/db.php"; // Asegúrate de que este archivo contenga la conexión PDO en la variable $db
 
 /* Validar sesión */
-
 if (!isset($_SESSION["id"])) {
     header("Location: /index.php");
     exit();
 }
 
 /* Validar rol */
-
 if (!isset($_SESSION["rol"]) || $_SESSION["rol"] !== "maestro") {
     header("Location: /index.php");
     exit();
 }
 
 $nombre = $_SESSION["nombre"];
+$hoy = date('Y-m-d');
 
+// --- LÓGICA DE BASE DE DATOS ---
+// Consultamos a todos los estudiantes (rol_id = 3) y verificamos su asistencia hoy
+$sql = "SELECT 
+            u.id, 
+            u.nombre, 
+            u.usuario, 
+            a.fecha AS fecha_asistencia,
+            CASE WHEN a.id IS NOT NULL THEN 'Presente' ELSE 'Ausente' END AS estado_hoy
+        FROM usuarios u
+        LEFT JOIN asistencias a ON u.id = a.usuario_id AND a.fecha = :hoy
+        WHERE u.rol_id = 3
+        ORDER BY u.nombre ASC";
+
+$stmt = $db->prepare($sql);
+$stmt->execute([':hoy' => $hoy]);
+$estudiantes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Cálculos para las tarjetas superiores
+$total_alumnos = count($estudiantes);
+$presentes = 0;
+foreach($estudiantes as $e) {
+    if($e['estado_hoy'] == 'Presente') $presentes++;
+}
+$porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumnos) * 100) : 0;
 ?> 
     
 <!DOCTYPE html>
@@ -67,7 +90,6 @@ $nombre = $_SESSION["nombre"];
         .card-custom:hover { transform: translateY(-5px); }
         .table-container { height: 400px; overflow-y: auto; }
 
-        /* Animación para el QR */
         .blink-animation { animation: blinker 2s linear infinite; }
         @keyframes blinker { 50% { opacity: 0.5; } }
     </style>
@@ -122,17 +144,17 @@ $nombre = $_SESSION["nombre"];
 
                 <div class="col-md-3">
                     <div class="card card-custom bg-white p-3 shadow-sm border-start border-primary border-4">
-                        <small class="text-muted fw-bold">PROGRESO MÓDULO</small>
-                        <h4 class="fw-bold">65%</h4>
+                        <small class="text-muted fw-bold">ASISTENCIA HOY</small>
+                        <h4 class="fw-bold"><?php echo $porcentaje_asistencia; ?>%</h4>
                         <div class="progress" style="height: 6px;">
-                            <div class="progress-bar" style="width: 65%"></div>
+                            <div class="progress-bar" style="width: <?php echo $porcentaje_asistencia; ?>%"></div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="card card-custom bg-white p-3 shadow-sm border-start border-success border-4">
-                        <small class="text-muted fw-bold">ASISTENCIA PROMEDIO</small>
-                        <h4 class="fw-bold">92%</h4>
+                        <small class="text-muted fw-bold">ESTUDIANTES PRESENTES</small>
+                        <h4 class="fw-bold"><?php echo $presentes; ?> / <?php echo $total_alumnos; ?></h4>
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -171,24 +193,46 @@ $nombre = $_SESSION["nombre"];
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="bg-info-subtle rounded-circle p-2 me-2 text-info">MA</div>
-                                                <div>
-                                                    <div class="fw-bold mb-0" style="font-size: 0.85rem;">Maria Alvarado</div>
-                                                    <small class="text-muted" style="font-size: 0.7rem;">Carnet: 2024-001</small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="text-center small">12/12</td>
-                                        <td class="text-center fw-bold text-success">95</td>
-                                        <td class="text-center"><span class="badge bg-success-subtle text-success border border-success-subtle">Presente</span></td>
-                                        <td class="text-center">
-                                            <button class="btn btn-sm btn-outline-primary" title="Ver Notas"><i class="bi bi-graph-up"></i></button>
-                                            <button class="btn btn-sm btn-outline-warning" title="Justificar"><i class="bi bi-chat-text"></i></button>
-                                        </td>
-                                    </tr>
+                                    <?php if ($total_alumnos > 0): ?>
+                                        <?php foreach ($estudiantes as $est): 
+                                            $nombres_arr = explode(" ", $est['nombre']);
+                                            $iniciales = strtoupper(substr($nombres_arr[0], 0, 1) . (isset($nombres_arr[1]) ? substr($nombres_arr[1], 0, 1) : ""));
+                                            $esPresente = ($est['estado_hoy'] === 'Presente');
+                                        ?>
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="bg-primary-subtle rounded-circle p-2 me-2 text-primary fw-bold" style="font-size: 0.7rem; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
+                                                            <?php echo $iniciales; ?>
+                                                        </div>
+                                                        <div>
+                                                            <div class="fw-bold mb-0" style="font-size: 0.85rem;"><?php echo htmlspecialchars($est['nombre']); ?></div>
+                                                            <small class="text-muted" style="font-size: 0.7rem;">ID: <?php echo $est['id']; ?> | @<?php echo htmlspecialchars($est['usuario']); ?></small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center small">---</td>
+                                                <td class="text-center fw-bold text-success">---</td>
+                                                <td class="text-center">
+                                                    <?php if ($esPresente): ?>
+                                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3">
+                                                            <i class="bi bi-check-lg me-1"></i> Presente
+                                                        </span>
+                                                    <?php else: ?>
+                                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3">
+                                                            <i class="bi bi-x-lg me-1"></i> Ausente
+                                                        </span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td class="text-center">
+                                                    <button class="btn btn-sm btn-outline-primary" title="Ver Notas"><i class="bi bi-graph-up"></i></button>
+                                                    <button class="btn btn-sm btn-outline-warning" title="Justificar"><i class="bi bi-chat-text"></i></button>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <tr><td colspan="5" class="text-center p-4 text-muted">No hay estudiantes registrados.</td></tr>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
@@ -254,7 +298,7 @@ $nombre = $_SESSION["nombre"];
 
         let baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
         const idClase = "Tecnico-A1"; 
-        const fecha = new Date().toISOString().split('T')[0]; 
+        const fecha = "<?php echo $hoy; ?>"; 
 
         const urlAsistencia = `${baseUrl}/procesar_qr.php?clase=${idClase}&fecha=${fecha}`;
         document.getElementById("fechaQR").innerText = new Date().toLocaleString();
