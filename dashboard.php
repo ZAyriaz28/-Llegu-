@@ -230,8 +230,8 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
                     <div class="card-custom">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="fw-bold m-0"><i class="bi bi-shield-lock text-info me-2"></i>Geofencing de Seguridad</h6>
-                                <small class="text-white-50">Localización: Campus Central</small>
+                                <h6 class="fw-bold m-0"><i class="bi bi-shield-lock text-info me-2"></i>Geolocalizacion de sesión</h6>
+                                <small class="text-white-50">Localización: Centro tecnológico, Che Guevara somoto</small>
                             </div>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" checked style="cursor:pointer">
