@@ -207,7 +207,7 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
             <ul class="nav flex-column">
                 <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
                 <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-layers me-2"></i> Módulos</a></li>
-                <li class="nav-item"><a class="nav-link" href="registrar_asistencias.php"><i class="bi bi-graph-up-arrow me-2"></i> Registros</a></li>
+                <li class="nav-item"><a class="nav-link" href="historial_asistencias.php"><i class="bi bi-graph-up-arrow me-2"></i> Registros</a></li>
                 <li class="nav-item mt-5"><a class="nav-link text-danger" href="logout.php"><i class="bi bi-power me-2"></i> Desconectar</a></li>
             </ul>
         </nav>
