@@ -1,23 +1,24 @@
 <?php
 
-//iniciar sesion siempre al principio
-
-session_start();
-
-//Requisitos para auth
-
 require_once "config/auth.php";
 
-// 2. Validación
-if(!isset($_SESSION["rol"]) || $_SESSION["rol"] !== "maestro"){
-    header("Location: index.html");
-    exit;
-} 
+/* Validar sesión */
 
-$nombre = $_SESSION["nombre"]
+if (!isset($_SESSION["id"])) {
+    header("Location: /index.php");
+    exit();
+}
 
+/* Validar rol */
 
-    ?>
+if (!isset($_SESSION["rol"]) || $_SESSION["rol"] !== "maestro") {
+    header("Location: /index.php");
+    exit();
+}
+
+$nombre = $_SESSION["nombre"];
+
+?> 
     
 <!DOCTYPE html>
 <html lang="es">
