@@ -300,57 +300,47 @@ if ($totalClases > 0) {
     </div>
 
     <script>
-        // Quitar Splash Screen después de 3 segundos
-        setTimeout(() => {
-            const splash = document.getElementById('splash-screen');
-            splash.style.opacity = '0';
-            setTimeout(() => splash.style.visibility = 'hidden', 500);
-        }, 3000);
-
-        // Función para cambiar pestañas
-        function changeTab(tabName, el) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            document.getElementById('tab-' + tabName).classList.add('active');
-            el.classList.add('active');
-        }
-        let contadorMensajes = 0; // Variable global para llevar el control
 
 function confirmarFinalizado() {
-    // Si ya se mostraron 3 mensajes, no hacer nada
-    if (contadorMensajes >= 3) {
-        return; 
 
-    }
-    const toastContainer = document.querySelector('.toast-container');
-    const mensajeHTML = `
-        <div class="toast align-items-center text-white bg-primary border-0 rounded-4 shadow" role="alert">
-            <div class="d-flex">
-                <div class="toast-body">
-                    <i class="bi bi-info-circle-fill me-2"></i> Asistencia ya registrada.
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        </div>`;
-    
-    // Insertar el mensaje
-    toastContainer.insertAdjacentHTML('beforeend', mensajeHTML);
-    
-    // Obtener el último mensaje insertado y mostrarlo
-    const elementoToast = toastContainer.lastElementChild;
-    const nuevoToast = new bootstrap.Toast(elementoToast, { delay: 1500 });
-    nuevoToast.show();
+    fetch("registrar_asistencia.php")
+    .then(response => response.json())
+    .then(data => {
 
-    // Sumar al contador
-    contadorMensajes++;
+        const toastElement = document.getElementById('toastAsistencia');
+        const toastBody = toastElement.querySelector('.toast-body');
 
-    // Opcional: Eliminar el elemento del HTML cuando se oculte para limpiar el código
-    elementoToast.addEventListener('hidden.bs.toast', () => {
-        elementoToast.remove();
+        if (data.status === "ok") {
+
+            toastBody.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i> Asistencia registrada correctamente.';
+
+            const btn = document.getElementById("btnAsistenciaCheck");
+            btn.classList.add("bg-success");
+            btn.innerHTML = '<i class="bi bi-check2-circle"></i>';
+            btn.onclick = null;
+
+        } else if (data.status === "existe") {
+
+            toastBody.innerHTML = '<i class="bi bi-info-circle-fill me-2"></i> Ya registraste asistencia hoy.';
+
+        } else {
+
+            toastBody.innerHTML = '<i class="bi bi-x-circle-fill me-2"></i> Error al registrar asistencia.';
+
+        }
+
+        const toast = new bootstrap.Toast(toastElement, { delay: 2000 });
+        toast.show();
+
+    })
+    .catch(error => {
+        console.error(error);
     });
+
 }
 
-    </script>
+</script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="modo-oscuro.js"></script>
     <script src="Geolocalizacion-API.js"></script>
