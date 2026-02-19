@@ -128,3 +128,44 @@ body {
         margin: 20px auto;
     }
 }
+
+
+/* Contenedor relativo para posicionar el ojo */
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* El input ahora tiene un poco de espacio extra a la derecha para que el texto no choque con el ojo */
+.custom-input {
+    padding-right: 45px !important; 
+    transition: all 0.3s ease;
+}
+
+/* Estilo del "botón" convertido en un simple icono clicable */
+.toggle-icon {
+    position: absolute;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #004a99; /* Azul de tu logo */
+    cursor: pointer;
+    padding: 0;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.toggle-icon:hover {
+    color: #007bff;
+    transform: scale(1.1);
+}
+
+/* Evitar el recuadro azul de enfoque de Bootstrap en el icono */
+.toggle-icon:focus {
+    outline: none;
+    box-shadow: none;
+}
