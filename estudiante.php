@@ -10,22 +10,25 @@ if (($_SESSION["rol"] ?? "") !== "estudiante") {
 
 $usuario_id = (int) $_SESSION["id"];
 $nombre     = $_SESSION["nombre"];
-$correo     = $_SESSION["correo"] ?? "estudiante@inatec.edu.ni"; // Fallback por si no está en sesión
 
-/* 1. Obtener total de clases */
+/* 1. OBTENER CORREO ACTUALIZADO DE LA BASE DE DATOS */
+$stmtUser = $db->prepare("SELECT correo FROM usuarios WHERE id = :id");
+$stmtUser->execute([":id" => $usuario_id]);
+$userData = $stmtUser->fetch();
+$correo = $userData['correo'] ?? "estudiante@inatec.edu.ni";
+
+/* 2. Obtener total de clases y asistencias */
 $totalClases = (int) $db
     ->query("SELECT COUNT(DISTINCT fecha) FROM asistencias")
     ->fetchColumn();
 
-/* 2. Total asistencias del estudiante */
 $stmt = $db->prepare("SELECT COUNT(*) FROM asistencias WHERE usuario_id = :id");
 $stmt->execute([":id" => $usuario_id]);
 $asistidas = (int) $stmt->fetchColumn();
 
-/* 3. Calcular porcentaje */
 $porcentaje = $totalClases > 0 ? round(($asistidas / $totalClases) * 100) : 0;
 
-/* 4. VERIFICAR SI YA ASISTIÓ HOY */
+/* 3. Verificar si ya registró asistencia hoy */
 $hoy = date('Y-m-d');
 $stmtCheck = $db->prepare("SELECT COUNT(*) FROM asistencias WHERE usuario_id = :id AND fecha = :fecha");
 $stmtCheck->execute([
@@ -47,8 +50,10 @@ $yaRegistroHoy = ($stmtCheck->fetchColumn() > 0);
 
     <style>
         :root { --primary: #0061ff; --accent: #60efff; --bg-light: #f4f7fe; --card-bg: #ffffff; --text-main: #1b2559; }
+        /* Estilos base para Modo Oscuro */
         body.dark-mode { --bg-light: #0b1437; --card-bg: #111c44; --text-main: #ffffff; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-light); margin: 0; overflow-x: hidden; transition: background 0.3s ease; }
+        
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-light); color: var(--text-main); margin: 0; overflow-x: hidden; transition: all 0.3s ease; }
 
         #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, var(--primary), var(--accent)); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; color: white; transition: opacity 0.5s ease; }
         .header-gradient { background: linear-gradient(135deg, var(--primary), var(--accent)); height: 220px; border-radius: 0 0 40px 40px; padding: 40px 25px; color: white; }
@@ -63,6 +68,10 @@ $yaRegistroHoy = ($stmtCheck->fetchColumn() > 0);
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Estilos específicos para componentes en Dark Mode */
+        body.dark-mode .offcanvas { background-color: var(--card-bg); color: white; }
+        body.dark-mode .form-control { background-color: #1b254b !important; color: white !important; border: 1px solid #2e3a59; }
     </style>
 </head>
 <body>
@@ -145,7 +154,7 @@ $yaRegistroHoy = ($stmtCheck->fetchColumn() > 0);
 
     <div class="offcanvas offcanvas-end border-0" tabindex="-1" id="panelPerfil" style="border-radius: 30px 0 0 30px;">
         <div class="offcanvas-header border-bottom">
-            <h5 class="offcanvas-title fw-bold"><i class="bi bi-person-gear me-2"></i>Mi Perfil</h5>
+            <h5 class="offcanvas-title fw-bold">Mi Perfil</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
         </div>
         <div class="offcanvas-body">
@@ -156,8 +165,8 @@ $yaRegistroHoy = ($stmtCheck->fetchColumn() > 0);
             </div>
             <form id="formPerfil">
                 <div class="mb-3">
-                    <label class="form-label small fw-bold">Correo</label>
-                    <input type="email" class="form-control bg-light border-0" name="email" value="<?= htmlspecialchars($correo) ?>">
+                    <label class="form-label small fw-bold">Correo (Desde BD)</label>
+                    <input type="email" class="form-control bg-light border-0" name="email" value="<?= htmlspecialchars($correo) ?>" readonly>
                 </div>
                 <div class="mb-3">
                     <label class="form-label small fw-bold">Nueva Contraseña</label>
@@ -165,6 +174,13 @@ $yaRegistroHoy = ($stmtCheck->fetchColumn() > 0);
                 </div>
                 <button type="submit" class="btn btn-primary w-100 rounded-3 py-2">Guardar Cambios</button>
             </form>
+
+            <hr class="my-4 opacity-25">
+            <h6 class="fw-bold mb-3 small text-muted text-uppercase">Información Académica</h6>
+            <div class="glass-card bg-light border-0 p-3 mb-2" style="border-radius: 15px;">
+                <p class="small text-muted mb-0">Carrera Técnica</p>
+                <p class="fw-bold mb-0">Ciberseguridad y Redes</p>
+            </div>
         </div>
     </div>
 
@@ -178,6 +194,11 @@ $yaRegistroHoy = ($stmtCheck->fetchColumn() > 0);
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script src="modo-oscuro.js"></script>
+    <script src="Geolocalizacion-API.js"></script>
+    <script src="guardarCambiosPerfil.js"></script>
+
     <script>
         // Splash Screen
         window.addEventListener("load", () => {
@@ -192,7 +213,6 @@ $yaRegistroHoy = ($stmtCheck->fetchColumn() > 0);
         function changeTab(tabId, element) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-            
             document.getElementById('tab-' + tabId).classList.add('active');
             element.classList.add('active');
         }
@@ -209,7 +229,7 @@ $yaRegistroHoy = ($stmtCheck->fetchColumn() > 0);
                 const toastBody = toastEl.querySelector('.toast-body');
                 
                 if (data.status === "ok") {
-                    toastBody.innerHTML = "✅ Asistencia registrada.";
+                    toastBody.innerHTML = "✅ Asistencia registrada correctamente.";
                     const btn = document.getElementById("btnAsistenciaCheck");
                     btn.style.background = "#198754";
                     btn.innerHTML = '<i class="bi bi-check2-circle"></i>';
