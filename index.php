@@ -3,7 +3,6 @@ require_once "config/auth.php";
 
 /* Si hay sesión restaurada o activa */
 if (isset($_SESSION["id"])) {
-
     switch ($_SESSION["rol"]) {
         case "admin":
             header("Location: admin.php");
@@ -15,7 +14,6 @@ if (isset($_SESSION["id"])) {
             header("Location: estudiante.php");
             break;
     }
-
     exit();
 }
 ?>
@@ -63,7 +61,27 @@ if (isset($_SESSION["id"])) {
             text-align: center;
             color: #6c757d;
             font-size: 0.9rem;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Estilo para la Alerta de Error Decorada */
+        .login-error-alert {
+            animation: shake 0.5s ease-in-out;
+            border-radius: 12px;
+            background: rgba(220, 53, 69, 0.1);
+            border: none;
+            color: #842029;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
         }
 
         .form-control,
@@ -71,17 +89,6 @@ if (isset($_SESSION["id"])) {
             border-radius: 10px;
             padding: 0.75rem 1rem;
             border: 1px solid #ced4da;
-        }
-
-        /* Ajuste para que el botón del ojo tenga las esquinas redondeadas correctamente */
-        .input-group .form-control {
-            border-top-right-radius: 0;
-            border-bottom-right-radius: 0;
-        }
-
-        .input-group .btn {
-            border-top-right-radius: 10px;
-            border-bottom-right-radius: 10px;
         }
 
         .btn-primary {
@@ -104,35 +111,48 @@ if (isset($_SESSION["id"])) {
             font-size: 0.85rem;
             color: #6c757d;
         }
+        
+        /* Ajustes para el wrapper de contraseña que tenías en el código anterior */
+        .password-wrapper {
+            position: relative;
+        }
+        .toggle-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: none;
+            color: #6c757d;
+            cursor: pointer;
+        }
     </style>
 </head>
 
 <body>
     <div class="login-container">
-        <div class="inatec-logo">
-            Sistema Educativo
-        </div>
+        <div class="inatec-logo">Sistema Educativo</div>
+        <div class="sub-title">Tecnológico Nacional - Nicaragua</div>
 
-        <div class="sub-title">
-            Tecnológico Nacional - Nicaragua
-        </div>
-
+        <?php if (isset($_SESSION["error_login"])): ?>
+            <div class="login-error-alert">
+                <i class="bi bi-exclamation-circle-fill fs-5 me-2"></i>
+                <div>
+                    <strong>Error:</strong> <?= $_SESSION["error_login"]; ?>
+                </div>
+            </div>
+            <?php unset($_SESSION["error_login"]); ?>
+        <?php endif; ?>
         <form action="login.php" method="POST">
-
             <div class="mb-3">
-                <label for="user" class="form-label text-dark fw-medium">
-                    Usuario o Correo
-                </label>
+                <label for="user" class="form-label text-dark fw-medium">Usuario o Correo</label>
                 <input type="text" class="form-control" id="user" name="user" placeholder="nombre.apellido" required>
             </div>
 
             <div class="mb-3">
-                <label for="pass" class="form-label text-dark fw-medium">
-                    Contraseña
-                </label>
+                <label for="pass" class="form-label text-dark fw-medium">Contraseña</label>
                 <div class="password-wrapper">
-                    <input type="password" class="form-control custom-input" id="pass" name="pass"
-                        placeholder="••••••••" required>
+                    <input type="password" class="form-control" id="pass" name="pass" placeholder="••••••••" required>
                     <button type="button" class="toggle-icon" id="btnToggle">
                         <i id="icono" class="bi bi-eye"></i>
                     </button>
@@ -140,10 +160,7 @@ if (isset($_SESSION["id"])) {
             </div>
 
             <div class="mb-4">
-                <label class="form-label text-dark fw-medium">
-                    Tipo de Usuario
-                </label>
-
+                <label class="form-label text-dark fw-medium">Tipo de Usuario</label>
                 <select class="form-select" name="rol" required>
                     <option value="estudiante">Estudiante</option>
                     <option value="maestro">Docente / Maestro</option>
@@ -154,36 +171,23 @@ if (isset($_SESSION["id"])) {
             <div class="mb-3 d-flex align-items-center justify-content-between">
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="recordar" name="recordar" value="1">
-                    <label class="form-check-label fw-medium text-dark" for="recordar">
-                        Recordarme
-                    </label>
+                    <label class="form-check-label fw-medium text-dark" for="recordar">Recordarme</label>
                 </div>
-                <a href="recordarme.php" class="small text-decoration-none fw-semibold text-primary">
-                    ¿Qué es esto?
-                </a>
+                <a href="recordarme.php" class="small text-decoration-none fw-semibold text-primary">¿Qué es esto?</a>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100 mb-3">
-                Entrar al Sistema
-            </button>
+            <button type="submit" class="btn btn-primary w-100 mb-3">Entrar al Sistema</button>
 
             <div class="text-center">
                 <span class="small text-muted">¿No Tienes Cuenta?</span>
-                <a href="crear-cuenta.html" class="text-decoration-none small fw-bold text-primary ms-1">
-                    Crear Cuenta
-                </a>
+                <a href="crear-cuenta.html" class="text-decoration-none small fw-bold text-primary ms-1">Crear Cuenta</a>
             </div>
-
         </form>
 
-        <div class="footer-text">
-            © 2026 Nicaragua - Educación Técnica
-        </div>
+        <div class="footer-text">© 2026 Nicaragua - Educación Técnica</div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="viewpassword.js"></script>
-
 </body>
-
 </html>
