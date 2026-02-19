@@ -2,14 +2,7 @@
 require_once "config/auth.php";
 require_once "config/db.php"; 
 
-/* Validar sesión */
-if (!isset($_SESSION["id"])) {
-    header("Location: /index.php");
-    exit();
-}
-
-/* Validar rol */
-if (!isset($_SESSION["rol"]) || $_SESSION["rol"] !== "maestro") {
+if (!isset($_SESSION["id"]) || $_SESSION["rol"] !== "maestro") {
     header("Location: /index.php");
     exit();
 }
@@ -17,270 +10,276 @@ if (!isset($_SESSION["rol"]) || $_SESSION["rol"] !== "maestro") {
 $nombre = $_SESSION["nombre"];
 $hoy = date('Y-m-d');
 
-// --- LÓGICA DE BASE DE DATOS ---
-$sql = "SELECT 
-            u.id, 
-            u.nombre, 
-            u.usuario, 
-            a.fecha AS fecha_asistencia,
-            CASE WHEN a.id IS NOT NULL THEN 'Presente' ELSE 'Ausente' END AS estado_hoy
+// Consulta optimizada
+$sql = "SELECT u.id, u.nombre, u.usuario, a.fecha AS fecha_asistencia,
+        CASE WHEN a.id IS NOT NULL THEN 'Presente' ELSE 'Ausente' END AS estado_hoy
         FROM usuarios u
         LEFT JOIN asistencias a ON u.id = a.usuario_id AND a.fecha = :hoy
-        WHERE u.rol_id = 3
-        ORDER BY u.nombre ASC";
+        WHERE u.rol_id = 3 ORDER BY u.nombre ASC";
 
 $stmt = $db->prepare($sql);
 $stmt->execute([':hoy' => $hoy]);
 $estudiantes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Cálculos para las tarjetas superiores
 $total_alumnos = count($estudiantes);
-$presentes = 0;
-foreach($estudiantes as $e) {
-    if($e['estado_hoy'] == 'Presente') $presentes++;
-}
+$presentes = count(array_filter($estudiantes, fn($e) => $e['estado_hoy'] == 'Presente'));
 $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumnos) * 100) : 0;
 ?> 
-    
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGA - Panel de Control Docente</title>
+    <title>SGA - Maestro Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     
     <style>
+        :root {
+            --primary-blue: #004a99;
+            --tech-cyan: #00d4ff;
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #004a99 0%, #007bff 100%);
+            background: radial-gradient(circle at top right, #002f61, #000b1a);
             min-height: 100vh;
-            padding: 10px;
+            color: white;
+            padding: 20px;
         }
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 25px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-        .sidebar-light {
-            background: #f8f9fa;
-            border-right: 1px solid #dee2e6;
-        }
-        .nav-link {
-            color: #495057;
-            padding: 12px 20px;
-            border-radius: 10px;
-            margin-bottom: 5px;
-            transition: 0.3s;
-        }
-        .nav-link:hover, .nav-link.active {
-            background: #004a99;
-            color: white !important;
-        }
-        .card-custom {
-            border: none;
-            border-radius: 15px;
-            transition: 0.3s;
-        }
-        .card-custom:hover { transform: translateY(-5px); }
-        .table-container { height: 400px; overflow-y: auto; }
 
-        .blink-animation { animation: blinker 2s linear infinite; }
-        @keyframes blinker { 50% { opacity: 0.5; } }
+        /* Contenedor Principal Glass */
+        .main-wrapper {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            display: flex;
+            min-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+
+        /* Sidebar Pro */
+        .sidebar {
+            width: 260px;
+            background: rgba(0, 0, 0, 0.2);
+            border-right: 1px solid var(--glass-border);
+            padding: 30px 20px;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.6);
+            padding: 12px 15px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            transition: 0.3s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: linear-gradient(90deg, var(--primary-blue), var(--tech-cyan));
+            color: white;
+            box-shadow: 0 10px 20px rgba(0, 212, 255, 0.2);
+        }
+
+        /* Tarjetas de Estadísticas */
+        .stat-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            transition: 0.3s;
+        }
+
+        .stat-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        /* Tabla Estilizada */
+        .custom-table-card {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            padding: 20px;
+        }
+
+        .table { color: white; border-collapse: separate; border-spacing: 0 10px; }
+        .table thead th { border: none; color: rgba(255,255,255,0.5); font-weight: 400; font-size: 0.8rem; }
+        .table tbody tr { background: rgba(255,255,255,0.03); transition: 0.3s; }
+        .table tbody tr td { border: none; padding: 15px 10px; vertical-align: middle; }
+        .table tbody tr:hover { background: rgba(255,255,255,0.08); transform: scale(1.01); }
+        .table tbody tr td:first-child { border-radius: 15px 0 0 15px; }
+        .table tbody tr td:last-child { border-radius: 0 15px 15px 0; }
+
+        /* Badge Glow */
+        .badge-presente { background: rgba(40, 167, 69, 0.2); color: #2ecc71; border: 1px solid #2ecc71; }
+        .badge-ausente { background: rgba(231, 76, 60, 0.2); color: #e74c3c; border: 1px solid #e74c3c; }
+
+        .btn-qr {
+            background: linear-gradient(135deg, #ff9966, #ff5e62);
+            border: none;
+            font-weight: 600;
+            border-radius: 12px;
+            padding: 10px 20px;
+        }
+        
+        .avatar-circle {
+            width: 40px; height: 40px;
+            background: linear-gradient(45deg, var(--primary-blue), var(--tech-cyan));
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: 600;
+        }
     </style>
 </head>
 <body>
 
-<div class="container-fluid glass-panel p-0">
-    <div class="row g-0">
-        <nav class="col-md-3 col-lg-2 sidebar-light p-4 d-none d-md-block">
-            <div class="text-center mb-4">
-                <div class="bg-primary text-white rounded-circle d-inline-block p-3 mb-2">
-                    <i class="bi bi-person-badge fs-3"></i>
-                </div>
-                <h6 class="fw-bold mb-0"><?php echo $nombre; ?></h6>
-                <small class="text-muted">Docente Técnico</small>
+<div class="main-wrapper animate__animated animate__fadeIn">
+    <aside class="sidebar d-none d-lg-block">
+        <div class="text-center mb-5">
+            <div class="avatar-circle mx-auto mb-3" style="width: 70px; height: 70px; font-size: 1.5rem;">
+                <?php echo strtoupper(substr($nombre,0,1)); ?>
             </div>
-            <ul class="nav flex-column">
-                <li class="nav-item"><a class="nav-link active" href="dashboard.php"><i class="bi bi-grid-fill me-2"></i> Dashboard</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-journal-check me-2"></i> Calificaciones</a></li>
-                <li class="nav-item"><a class="nav-link" href="historial_asistencias.php"><i class="bi bi-folder me-2"></i> Unidades</a></li>
-                <li class="nav-item"><hr class="dropdown-divider"></li>
-                <li class="nav-item"><a class="nav-link text-danger" href="logout.php"><i class="bi bi-box-arrow-left me-2"></i> Salir</a></li>
-            </ul>
+            <h6 class="mb-0 fw-bold"><?php echo $nombre; ?></h6>
+            <small class="text-white-50">Docente Principal</small>
+        </div>
+        
+        <nav class="nav flex-column">
+            <a class="nav-link active" href="#"><i class="bi bi-grid-1x2-fill me-3"></i> Dashboard</a>
+            <a class="nav-link" href="#"><i class="bi bi-person-video3 me-3"></i> Mis Clases</a>
+            <a class="nav-link" href="historial_asistencias.php"><i class="bi bi-file-earmark-bar-graph me-3"></i> Reportes</a>
+            <a class="nav-link" href="#"><i class="bi bi-gear me-3"></i> Configuración</a>
+            <div class="mt-5">
+                <a class="nav-link text-danger" href="logout.php"><i class="bi bi-power me-3"></i> Cerrar Sesión</a>
+            </div>
         </nav>
+    </aside>
 
-        <main class="col-md-9 col-lg-10 p-4">
+    <main class="flex-grow-1 p-4 p-lg-5" style="overflow-y: auto;">
+        <header class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h3 class="fw-bold mb-1">Bienvenido, Prof. <?php echo explode(" ", $nombre)[0]; ?></h3>
+                <p class="text-white-50 mb-0">Gestión de asistencia para hoy: <?php echo date('d M, Y'); ?></p>
+            </div>
+            <button class="btn btn-qr animate__animated animate__pulse animate__infinite" onclick="generarQR()">
+                <i class="bi bi-qr-code-scan me-2"></i> INICIAR REGISTRO QR
+            </button>
+        </header>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-primary bg-opacity-25 text-primary"><i class="bi bi-people"></i></div>
+                    <small class="text-white-50">Total Estudiantes</small>
+                    <h3 class="fw-bold mb-0"><?php echo $total_alumnos; ?></h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-success bg-opacity-25 text-success"><i class="bi bi-check2-circle"></i></div>
+                    <small class="text-white-50">Asistencia Hoy</small>
+                    <h3 class="fw-bold mb-0"><?php echo $porcentaje_asistencia; ?>%</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-warning bg-opacity-25 text-warning"><i class="bi bi-clock-history"></i></div>
+                    <small class="text-white-50">Llegadas Tarde</small>
+                    <h3 class="fw-bold mb-0">5</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card border-danger border-opacity-50">
+                    <div class="stat-icon bg-danger bg-opacity-25 text-danger"><i class="bi bi-exclamation-triangle"></i></div>
+                    <small class="text-white-50">Alerta Deserción</small>
+                    <h3 class="fw-bold mb-0">2</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="custom-table-card animate__animated animate__fadeInUp">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h4 class="fw-bold text-primary"><i class="bi bi-mortarboard-fill me-2"></i>Gestión de Módulo</h4>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-dark btn-sm" onclick="generarQR()">
-                        <i class="bi bi-qr-code-scan me-1"></i> QR de Hoy
-                    </button>
-                    <a href="historial_asistencias.php" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel me-1"></i> Exportar</a>
+                <h5 class="fw-bold mb-0">Lista de Grupo: <span class="text-info">Técnico A1</span></h5>
+                <div class="input-group w-25">
+                    <span class="input-group-text bg-transparent border-0 text-white-50"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control bg-transparent border-0 text-white" placeholder="Filtrar...">
                 </div>
             </div>
 
-            <div class="row g-3 mb-4">
-                <div class="col-12">
-                    <div class="card border-0 shadow-sm p-3 bg-white rounded-4 mb-3">
-                        <h6 class="fw-bold mb-3"><i class="bi bi-geo-alt-fill text-danger"></i> Perímetro de Seguridad</h6>
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="checkGeo" checked>
-                            <label class="form-check-label small" for="checkGeo">Restringir por ubicación (50m)</label>
-                        </div>
-                        <div class="mt-2">
-                            <small class="text-muted" style="font-size: 0.7rem;">
-                                Ubicación actual: <strong>Centro Tecnológico</strong>
-                            </small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="card card-custom bg-white p-3 shadow-sm border-start border-primary border-4">
-                        <small class="text-muted fw-bold">ASISTENCIA HOY</small>
-                        <h4 class="fw-bold"><?php echo $porcentaje_asistencia; ?>%</h4>
-                        <div class="progress" style="height: 6px;">
-                            <div class="progress-bar" style="width: <?php echo $porcentaje_asistencia; ?>%"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card card-custom bg-white p-3 shadow-sm border-start border-success border-4">
-                        <small class="text-muted fw-bold">ESTUDIANTES PRESENTES</small>
-                        <h4 class="fw-bold"><?php echo $presentes; ?> / <?php echo $total_alumnos; ?></h4>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card card-custom bg-white p-3 shadow-sm border-start border-warning border-4">
-                        <small class="text-muted fw-bold">PENDIENTES EVALUAR</small>
-                        <h4 class="fw-bold">8</h4>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card card-custom bg-white p-3 shadow-sm border-start border-danger border-4">
-                        <small class="text-muted fw-bold">ALERTA DESERCIÓN</small>
-                        <h4 class="fw-bold">2</h4>
-                    </div>
-                </div>
+            <div class="table-responsive" style="max-height: 500px;">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>ESTUDIANTE</th>
+                            <th>USUARIO</th>
+                            <th class="text-center">ESTADO HOY</th>
+                            <th class="text-center">RENDIMIENTO</th>
+                            <th class="text-center">ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($estudiantes as $est): ?>
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-circle me-3"><?php echo substr($est['nombre'],0,2); ?></div>
+                                    <span class="fw-medium"><?php echo $est['nombre']; ?></span>
+                                </div>
+                            </td>
+                            <td><span class="text-white-50 small">@<?php echo $est['usuario']; ?></span></td>
+                            <td class="text-center">
+                                <span class="badge rounded-pill <?php echo $est['estado_hoy'] == 'Presente' ? 'badge-presente' : 'badge-ausente'; ?> px-3 py-2">
+                                    <?php echo $est['estado_hoy']; ?>
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <div class="progress bg-white bg-opacity-10" style="height: 6px; width: 100px; margin: 0 auto;">
+                                    <div class="progress-bar bg-info" style="width: 85%"></div>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-light border-0"><i class="bi bi-eye"></i></button>
+                                <button class="btn btn-sm btn-outline-light border-0"><i class="bi bi-pencil-square"></i></button>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
-
-            <div class="row g-4">
-                <div class="col-lg-8">
-                    <div class="card border-0 shadow-sm p-3 bg-white rounded-4">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="fw-bold">Control de Grupo: <span class="text-primary">Técnico Superior A1</span></h6>
-                            <div class="input-group input-group-sm w-50">
-                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
-                                <input type="text" class="form-control bg-light border-start-0" placeholder="Buscar alumno...">
-                            </div>
-                        </div>
-                        <div class="table-container">
-                            <table class="table align-middle">
-                                <thead class="table-light">
-                                    <tr class="small">
-                                        <th>ESTUDIANTE</th>
-                                        <th class="text-center">ASIST.</th>
-                                        <th class="text-center">NOTA ACUM.</th>
-                                        <th class="text-center">ESTADO</th>
-                                        <th class="text-center">ACCIONES</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php if ($total_alumnos > 0): ?>
-                                        <?php foreach ($estudiantes as $est): 
-                                            $nombres_arr = explode(" ", $est['nombre']);
-                                            $iniciales = strtoupper(substr($nombres_arr[0], 0, 1) . (isset($nombres_arr[1]) ? substr($nombres_arr[1], 0, 1) : ""));
-                                            $esPresente = ($est['estado_hoy'] === 'Presente');
-                                        ?>
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="bg-primary-subtle rounded-circle p-2 me-2 text-primary fw-bold" style="font-size: 0.7rem; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
-                                                            <?php echo $iniciales; ?>
-                                                        </div>
-                                                        <div>
-                                                            <div class="fw-bold mb-0" style="font-size: 0.85rem;"><?php echo htmlspecialchars($est['nombre']); ?></div>
-                                                            <small class="text-muted" style="font-size: 0.7rem;">ID: <?php echo $est['id']; ?> | @<?php echo htmlspecialchars($est['usuario']); ?></small>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td class="text-center small">---</td>
-                                                <td class="text-center fw-bold text-success">---</td>
-                                                <td class="text-center">
-                                                    <?php if ($esPresente): ?>
-                                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3">
-                                                            <i class="bi bi-check-lg me-1"></i> Presente
-                                                        </span>
-                                                    <?php else: ?>
-                                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3">
-                                                            <i class="bi bi-x-lg me-1"></i> Ausente
-                                                        </span>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td class="text-center">
-                                                    <button class="btn btn-sm btn-outline-primary" title="Ver Notas"><i class="bi bi-graph-up"></i></button>
-                                                    <button class="btn btn-sm btn-outline-warning" title="Justificar"><i class="bi bi-chat-text"></i></button>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    <?php else: ?>
-                                        <tr><td colspan="5" class="text-center p-4 text-muted">No hay estudiantes registrados.</td></tr>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-4">
-                    <div class="card border-0 shadow-sm p-3 bg-white rounded-4 mb-3 text-center">
-                        <h6 class="fw-bold mb-3">Asistencia Rápida</h6>
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-primary py-3 fw-bold rounded-3" onclick="generarQR()">
-                                <i class="bi bi-broadcast me-2"></i> ABRIR REGISTRO QR
-                            </button>
-                            <a href="historial_asistencias.php" class="btn btn-outline-secondary">
-                                <i class="bi bi-clock-history me-1"></i> Ver Sesiones Anteriores
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="card border-0 shadow-sm p-3 bg-white rounded-4">
-                        <h6 class="fw-bold mb-3">Avisos al Grupo</h6>
-                        <textarea class="form-control form-control-sm mb-2" rows="3" placeholder="Escribir mensaje para los alumnos..."></textarea>
-                        <button class="btn btn-dark btn-sm w-100">Publicar en el Muro</button>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
+        </div>
+    </main>
 </div>
 
-<div class="modal fade" id="modalAsistencia" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modalAsistencia" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content text-center p-4" style="border-radius: 20px;">
-            <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold text-primary w-100">Escanea para Asistencia</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body d-flex flex-column align-items-center justify-content-center">
-                <div id="contenedorQR" class="mb-3 p-3 border rounded bg-light d-flex justify-content-center align-items-center" style="min-height: 220px; min-width: 220px;"></div>
-                <h6 class="fw-bold text-dark mb-1">Técnico Superior A1</h6>
-                <p class="text-muted small mb-0" id="fechaQR">Generando...</p>
-                <div class="mt-3 badge bg-danger bg-opacity-10 text-danger border border-danger blink-animation">
-                    <i class="bi bi-broadcast"></i> EMITIENDO SEÑAL
+        <div class="modal-content border-0 shadow-lg" style="background: #fff; border-radius: 30px;">
+            <div class="modal-body text-center p-5">
+                <h4 class="fw-bold text-dark mb-4">Registro de Asistencia</h4>
+                <div id="contenedorQR" class="mx-auto mb-4 p-3 bg-white shadow-sm rounded-4" style="width: fit-content;"></div>
+                <p class="text-muted small">Los estudiantes deben escanear este código para marcar su entrada.</p>
+                <div class="badge bg-primary bg-opacity-10 text-primary p-2 px-3">
+                    <i class="bi bi-clock me-2"></i> Sesión activa: Técnico Superior A1
                 </div>
-            </div>
-            <div class="modal-footer border-0 justify-content-center">
-                <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">
-                    Finalizar Sesión
-                </button>
+                <button class="btn btn-dark w-100 mt-4 py-3 rounded-4 fw-bold" data-bs-dismiss="modal">CERRAR REGISTRO</button>
             </div>
         </div>
     </div>
@@ -288,36 +287,13 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
 <script>
     function generarQR() {
         const contenedor = document.getElementById("contenedorQR");
-        if(!contenedor) return;
         contenedor.innerHTML = ""; 
-
-        let baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
-        const idClase = "Tecnico-A1"; 
-        const fecha = "<?php echo $hoy; ?>"; 
-
-        const urlAsistencia = `${baseUrl}/procesar_qr.php?clase=${idClase}&fecha=${fecha}`;
-        document.getElementById("fechaQR").innerText = new Date().toLocaleString();
-
-        try {
-            new QRCode(contenedor, {
-                text: urlAsistencia,
-                width: 200,
-                height: 200,
-                colorDark : "#004a99",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.M
-            });
-        } catch (e) {
-            contenedor.innerHTML = "<p class='text-danger'>Error al cargar QR.</p>";
-        }
-
-        const modalEl = document.getElementById('modalAsistencia');
-        const modal = new bootstrap.Modal(modalEl);
-        modal.show();
+        let url = window.location.origin + "/procesar_qr.php?clase=A1&fecha=<?php echo $hoy; ?>";
+        new QRCode(contenedor, { text: url, width: 220, height: 220, colorDark : "#001a33" });
+        new bootstrap.Modal(document.getElementById('modalAsistencia')).show();
     }
 </script>
 </body>
