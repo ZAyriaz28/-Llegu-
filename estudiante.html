@@ -3,34 +3,31 @@
 require_once "config/db.php";
 require_once "config/auth.php";
 
-if (!isset($_SESSION["id"])) {
-    header("Location: /index.php");
-    exit();
-}
-
+/* Validar rol (auth.php ya valida sesión) */
 if (($_SESSION["rol"] ?? "") !== "estudiante") {
     header("Location: /index.php");
     exit();
 }
 
-$usuario_id = $_SESSION["id"];
-$nombre = $_SESSION["nombre"];
+$usuario_id = (int) $_SESSION["id"];
+$nombre     = $_SESSION["nombre"];
 
-// Total clases distintas registradas en sistema
-$totalClasesStmt = $db->query("SELECT COUNT(DISTINCT fecha) as total FROM asistencias");
-$totalClases = $totalClasesStmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+/* Obtener total de clases y asistencias del estudiante en una sola ejecución lógica */
 
-// Clases asistidas por este estudiante
-$stmt = $db->prepare("SELECT COUNT(*) as asistidas FROM asistencias WHERE usuario_id = :id");
+// Total clases registradas en el sistema
+$totalClases = (int) $db
+    ->query("SELECT COUNT(DISTINCT fecha) FROM asistencias")
+    ->fetchColumn();
+
+// Total asistencias del estudiante
+$stmt = $db->prepare("SELECT COUNT(*) FROM asistencias WHERE usuario_id = :id");
 $stmt->execute([":id" => $usuario_id]);
-$asistidas = $stmt->fetch(PDO::FETCH_ASSOC)['asistidas'] ?? 0;
+$asistidas = (int) $stmt->fetchColumn();
 
-$porcentaje = 0;
-if ($totalClases > 0) {
-    $porcentaje = round(($asistidas / $totalClases) * 100);
-}
-
-?>
+/*  Calcular porcentaje */
+$porcentaje = $totalClases > 0
+    ? round(($asistidas / $totalClases) * 100)
+    : 0;
 
 <!DOCTYPE html>
 <html lang="es">
