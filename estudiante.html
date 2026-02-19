@@ -198,7 +198,8 @@ if ($totalClases > 0) {
         <div class="d-flex justify-content-between align-items-center max-width-container mx-auto"
             style="max-width: 600px;">
             <div>
-                <h4 class="fw-bold mb-0">¡Hola, <span id="userName">Juan</span>! 👋</h4>
+                <!-- 🔹 Nombre dinámico -->
+                <h4 class="fw-bold mb-0">¡Hola, <span id="userName"><?= htmlspecialchars($nombre) ?></span>! 👋</h4>
                 <p class="small opacity-75 mb-0">Estudiante Técnico</p>
             </div>
             <button class="btn text-white p-0" id="btnDarkMode">
@@ -211,17 +212,23 @@ if ($totalClases > 0) {
         <div id="tab-home" class="tab-content active">
             <div class="glass-card mb-4 text-center">
                 <h6 class="text-muted small fw-bold">PROGRESO DE ASISTENCIA</h6>
+
+                <!-- 🔹 Porcentaje dinámico -->
                 <h2 class="fw-bold text-primary"><?= $porcentaje ?>%</h2>
+
                 <div class="progress" style="height: 8px;">
-                    <div class="progress-bar" style="width: 85%"></div>
+                    <!-- 🔹 Barra ahora usa el porcentaje real -->
+                    <div class="progress-bar" style="width: <?= $porcentaje ?>%"></div>
                 </div>
             </div>
 
             <h6 class="fw-bold mb-3 ms-2">TU CLASE DE HOY</h6>
             <div class="glass-card border-start border-primary border-4">
                 <h5 class="fw-bold mb-1">Ciberseguridad y Redes</h5>
-                <p class="small text-muted mb-0"><i class="bi bi-geo-alt-fill text-primary"></i> Centro Tecnológico -
-                    Somoto</p>
+                <p class="small text-muted mb-0">
+                    <i class="bi bi-geo-alt-fill text-primary"></i>
+                    Centro Tecnológico - Somoto
+                </p>
             </div>
         </div>
 
@@ -236,64 +243,36 @@ if ($totalClases > 0) {
         </div>
     </div>
 
-   <div class="qr-fab bg-success border-success" id="btnAsistenciaCheck" onclick="confirmarFinalizado()" style=" background: linear-gradient(135deg, var(--primary), var(--accent)); border: 5px solid var(--bs-primary);">
-    <i class="bi bi-check-lg"></i>
-</div>
+    <!-- 🔥 BOTÓN INTELIGENTE -->
+    <div 
+        class="qr-fab <?= $yaRegistroHoy ? 'bg-success border-success' : '' ?>" 
+        id="btnAsistenciaCheck"
+        <?= $yaRegistroHoy ? '' : 'onclick="confirmarFinalizado()"' ?>
+        style="background: linear-gradient(135deg, var(--primary), var(--accent)); border: 5px solid var(--bs-primary);">
+
+        <i class="bi <?= $yaRegistroHoy ? 'bi-check2-circle' : 'bi-check-lg' ?>"></i>
+    </div>
 
     <div class="bottom-nav">
         <div class="nav-item active" onclick="changeTab('home', this)">
             <i class="bi bi-house-door-fill fs-4"></i>
             <div style="font-size: 0.65rem;">Inicio</div>
         </div>
+
         <div class="nav-item" onclick="changeTab('horario', this)">
             <i class="bi bi-calendar-week fs-4"></i>
             <div style="font-size: 0.65rem;">Horario</div>
         </div>
+
         <div style="flex: 1;"></div>
-        <div class="nav-item" data-bs-toggle="offcanvas" data-bs-target="#panelPerfil" aria-controls="panelPerfil">
+
+        <div class="nav-item" data-bs-toggle="offcanvas" data-bs-target="#panelPerfil">
             <i class="bi bi-person-circle fs-4"></i>
             <div style="font-size: 0.65rem;">Perfil</div>
         </div>
-        <div class="offcanvas offcanvas-end border-0" tabindex="-1" id="panelPerfil" aria-labelledby="panelPerfilLabel" style="width: 85%; border-radius: 25px 0 0 25px; background: var(--card-bg); color: var(--text-main);">
-    <div class="offcanvas-header border-bottom">
-        <h5 class="offcanvas-title fw-bold" id="panelPerfilLabel">Mi Perfil</h5>
-        <button type="button" class="btn-close shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-        <div class="text-center mb-4">
-            <div id="avatarPanel" class="mx-auto mb-2 shadow-sm" style="width: 80px; height: 80px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.8rem;">
-                JP
-            </div>
-            <h5 class="fw-bold mb-0" id="nombrePanelDisplay">Juan Pérez</h5>
-            <small class="text-muted">Estudiante INATEC</small>
-        </div>
 
-        <hr class="opacity-10">
-
-        <div class="mb-3">
-            <label class="form-label small fw-bold">Nombre Completo</label>
-            <div class="input-group">
-                <span class="input-group-text bg-light border-0"><i class="bi bi-person"></i></span>
-                <input type="text" id="inputNombre" class="form-control bg-light border-0" placeholder="Escribe tu nombre">
-            </div>
-        </div>
-
-        <div class="mb-4">
-            <label class="form-label small fw-bold">Centro Tecnológico</label>
-            <input type="text" class="form-control bg-light border-0" value="Somoto, Madriz" disabled>
-        </div>
-
-        <button class="btn btn-primary w-100 rounded-pill py-2 fw-bold" onclick="guardarCambiosPerfil()">
-            <i class="bi bi-check-lg me-2"></i>Guardar Cambios
-        </button>
-
-        <div class="mt-5 text-center">
-            <p class="small text-muted mb-0">ID: 2024-0012NI</p>
-            <p class="small text-muted">Versión 2.1.0</p>
-        </div>
-    </div>
-</div>
-        <div class="nav-item" onclick="window.location.href='index.html'">
+        <!-- 🔹 CERRAR SESIÓN CORRECTO -->
+        <div class="nav-item" onclick="window.location.href='logout.php'">
             <i class="bi bi-box-arrow-right fs-4"></i>
             <div style="font-size: 0.65rem;">Salir</div>
         </div>
