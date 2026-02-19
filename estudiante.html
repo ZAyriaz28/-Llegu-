@@ -16,6 +16,20 @@ if (($_SESSION["rol"] ?? "") !== "estudiante") {
 $usuario_id = $_SESSION["id"];
 $nombre = $_SESSION["nombre"];
 
+// Total clases distintas registradas en sistema
+$totalClasesStmt = $db->query("SELECT COUNT(DISTINCT fecha) as total FROM asistencias");
+$totalClases = $totalClasesStmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+
+// Clases asistidas por este estudiante
+$stmt = $db->prepare("SELECT COUNT(*) as asistidas FROM asistencias WHERE usuario_id = :id");
+$stmt->execute([":id" => $usuario_id]);
+$asistidas = $stmt->fetch(PDO::FETCH_ASSOC)['asistidas'] ?? 0;
+
+$porcentaje = 0;
+if ($totalClases > 0) {
+    $porcentaje = round(($asistidas / $totalClases) * 100);
+}
+
 ?>
 
 <!DOCTYPE html>
