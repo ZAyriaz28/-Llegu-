@@ -113,7 +113,7 @@ if (isset($_SESSION["id"])) {
         }
         
         .password-wrapper .form-control {
-    padding-right: 45px; /* Deja espacio para el icono */
+    padding-right: 45px;
 }
 
 .toggle-icon {
@@ -123,12 +123,20 @@ if (isset($_SESSION["id"])) {
     transform: translateY(-50%);
     border: none;
     background: none;
-    color: #6c757d;
+    color: #6c757d; /* Color gris original */
     cursor: pointer;
     z-index: 10;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: color 0.3s ease; /* Transición suave de color */
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Esta clase mantendrá el azul cuando el ojo esté "tachado" */
+.toggle-icon.active-blue {
+    color: #007bff !important; /* Azul de INATEC */
 }
 
 .toggle-icon:focus {
