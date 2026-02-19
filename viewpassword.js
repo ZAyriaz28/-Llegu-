@@ -5,13 +5,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (btnToggle && passInput) {
         btnToggle.addEventListener('click', function() {
-            // Cambiar el tipo de input
             if (passInput.type === 'password') {
                 passInput.type = 'text';
                 icono.classList.replace('bi-eye', 'bi-eye-slash');
+                btnToggle.classList.add('active-blue'); // Ponemos el azul
             } else {
                 passInput.type = 'password';
                 icono.classList.replace('bi-eye-slash', 'bi-eye');
+                btnToggle.classList.remove('active-blue'); // Quitamos el azul
             }
         });
     }
