@@ -123,7 +123,7 @@ $nombre_maestro = $_SESSION["nombre"];
     
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <a href="panel_profesor.php" class="text-decoration-none small fw-bold text-primary">
+            <a href="dashboard.php" class="text-decoration-none small fw-bold text-primary">
                 <i class="bi bi-arrow-left"></i> Volver al Panel
             </a>
             <h2 class="fw-bold text-dark m-0">Historial de Registros</h2>
