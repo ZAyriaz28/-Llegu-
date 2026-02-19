@@ -91,24 +91,27 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
             transition: 0.3s;
         }
 
-        /* --- MEJORAS EN LA TABLA --- */
+        /* --- SOLUCIÓN DEFINITIVA PARA EL BLANCO DE LA TABLA --- */
         .table-container { 
             height: 420px; 
             overflow-y: auto; 
             scrollbar-width: thin;
-            scrollbar-color: var(--primary-blue) transparent;
+            scrollbar-color: var(--tech-cyan) transparent;
         }
         
+        /* Eliminamos fondos de Bootstrap */
         .table { 
-            color: white; 
+            --bs-table-bg: transparent !important;
+            --bs-table-color: white !important;
+            color: white !important;
             margin-bottom: 0; 
             border-collapse: separate; 
-            border-spacing: 0 10px; /* Crea el efecto de filas flotantes */
+            border-spacing: 0 10px;
         }
 
         .table thead th {
-            background: transparent;
-            color: var(--tech-cyan);
+            background: transparent !important;
+            color: var(--tech-cyan) !important;
             font-size: 0.75rem;
             text-transform: uppercase;
             border: none;
@@ -116,31 +119,40 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
             letter-spacing: 1px;
         }
 
+        /* Forzamos que las celdas NO sean blancas */
+        .table td {
+            background: transparent !important;
+            border: none !important;
+            padding: 15px !important;
+            color: white !important;
+        }
+
         .table tbody tr {
-            background: rgba(255, 255, 255, 0.03); /* Fondo ultra leve */
+            background: rgba(255, 255, 255, 0.03) !important;
             transition: 0.3s;
             border-radius: 15px;
         }
 
         .table tbody tr:hover { 
-            background: rgba(255, 255, 255, 0.08); 
+            background: rgba(255, 255, 255, 0.08) !important;
             transform: scale(1.01);
-        }
-
-        .table td {
-            border: none !important;
-            padding: 15px !important;
         }
 
         /* Resalte del Nombre del Estudiante */
         .student-name {
-            color: #ffffff;
-            font-weight: 600;
+            color: #ffffff !important;
+            font-weight: 600 !important;
             font-size: 0.95rem;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
         }
 
-        /* Avatar Estilizado */
+        .student-user {
+            color: var(--tech-cyan) !important;
+            font-size: 0.75rem;
+            font-family: monospace;
+            opacity: 0.8;
+        }
+
         .avatar-tech {
             background: linear-gradient(135deg, var(--primary-blue), var(--tech-cyan));
             width: 38px;
@@ -153,17 +165,18 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
             border: 1px solid rgba(255,255,255,0.3);
             box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
         }
-        /* -------------------------- */
 
-        .form-control, .input-group-text {
+        /* Inputs Estilizados (para el buscador) */
+        .form-control {
             background: rgba(255, 255, 255, 0.05) !important;
             border: 1px solid var(--glass-border) !important;
             color: white !important;
             border-radius: 10px;
         }
+        .form-control::placeholder { color: rgba(255,255,255,0.3); }
 
-        .badge-presente { background: rgba(0, 255, 128, 0.1); color: #00ff80; border: 1px solid #00ff80; text-shadow: 0 0 5px #00ff80; }
-        .badge-ausente { background: rgba(255, 71, 87, 0.1); color: #ff4757; border: 1px solid #ff4757; text-shadow: 0 0 5px #ff4757; }
+        .badge-presente { background: rgba(0, 255, 128, 0.15) !important; color: #00ff80 !important; border: 1px solid #00ff80; }
+        .badge-ausente { background: rgba(255, 71, 87, 0.15) !important; color: #ff4757 !important; border: 1px solid #ff4757; }
 
         .btn-qr-neon {
             background: linear-gradient(135deg, #00d4ff, #004a99);
@@ -221,7 +234,7 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
                                 <small class="text-white-50">Localización: Campus Central</small>
                             </div>
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" checked>
+                                <input class="form-check-input" type="checkbox" checked style="cursor:pointer">
                             </div>
                         </div>
                     </div>
@@ -285,7 +298,7 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
                                                     </div>
                                                     <div>
                                                         <div class="student-name"><?php echo $est['nombre']; ?></div>
-                                                        <code class="text-info" style="font-size: 0.7rem;">@<?php echo $est['usuario']; ?></code>
+                                                        <div class="student-user">@<?php echo $est['usuario']; ?></div>
                                                     </div>
                                                 </div>
                                             </td>
