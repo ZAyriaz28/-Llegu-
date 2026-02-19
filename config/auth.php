@@ -37,10 +37,3 @@ if (!isset($_SESSION["id"])) {
         }
     }
 }
-
-/* ========= SI AÚN NO HAY SESIÓN ========= */
-
-if (!isset($_SESSION["id"])) {
-    header("Location: index.php");
-    exit();
-}
