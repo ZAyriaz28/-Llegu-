@@ -279,6 +279,22 @@ $porcentaje = $totalClases > 0
 
     <script>
 
+// 🔹 Splash Screen Auto Hide
+window.addEventListener("load", function () {
+    const splash = document.getElementById("splash-screen");
+
+    if (splash) {
+        setTimeout(() => {
+            splash.style.opacity = "0";
+            splash.style.transition = "opacity 0.5s ease";
+
+            setTimeout(() => {
+                splash.style.display = "none";
+            }, 500);
+        }, 800);
+    }
+});
+
 function confirmarFinalizado() {
 
     fetch("registrar_asistencia.php")
