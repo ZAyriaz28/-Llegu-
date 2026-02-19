@@ -29,6 +29,8 @@ $porcentaje = $totalClases > 0
     ? round(($asistidas / $totalClases) * 100)
     : 0;
 
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 
