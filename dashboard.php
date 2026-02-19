@@ -10,7 +10,6 @@ if (!isset($_SESSION["id"]) || $_SESSION["rol"] !== "maestro") {
 $nombre = $_SESSION["nombre"];
 $hoy = date('Y-m-d');
 
-// Consulta optimizada
 $sql = "SELECT u.id, u.nombre, u.usuario, a.fecha AS fecha_asistencia,
         CASE WHEN a.id IS NOT NULL THEN 'Presente' ELSE 'Ausente' END AS estado_hoy
         FROM usuarios u
@@ -31,7 +30,7 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGA - Maestro Dashboard</title>
+    <title>SGA - Maestro Dashboard Tech</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -41,113 +40,154 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
         :root {
             --primary-blue: #004a99;
             --tech-cyan: #00d4ff;
-            --glass: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.2);
+            --soft-bg: #f0f4f8;
+            --glass-white: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.4);
         }
 
         body {
             font-family: 'Poppins', sans-serif;
-            background: radial-gradient(circle at top right, #002f61, #000b1a);
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
             min-height: 100vh;
-            color: white;
-            padding: 20px;
+            color: #2d3436;
+            padding: 15px;
         }
 
-        /* Contenedor Principal Glass */
+        /* Contenedor Principal Estilo Apple/Glass */
         .main-wrapper {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(15px);
+            background: var(--glass-white);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
             border-radius: 30px;
             display: flex;
-            min-height: 90vh;
+            min-height: 92vh;
             overflow: hidden;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
         }
 
-        /* Sidebar Pro */
+        /* Sidebar Limpio */
         .sidebar {
-            width: 260px;
-            background: rgba(0, 0, 0, 0.2);
-            border-right: 1px solid var(--glass-border);
-            padding: 30px 20px;
+            width: 280px;
+            background: rgba(255, 255, 255, 0.5);
+            border-right: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 40px 25px;
         }
 
-        .nav-link {
-            color: rgba(255, 255, 255, 0.6);
-            padding: 12px 15px;
-            border-radius: 15px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            transition: 0.3s;
+        .sidebar .nav-link {
+            color: #636e72;
+            padding: 14px 18px;
+            border-radius: 16px;
+            margin-bottom: 8px;
+            font-weight: 500;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .nav-link:hover, .nav-link.active {
-            background: linear-gradient(90deg, var(--primary-blue), var(--tech-cyan));
-            color: white;
-            box-shadow: 0 10px 20px rgba(0, 212, 255, 0.2);
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background: white;
+            color: var(--primary-blue);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.04);
+            transform: translateX(5px);
         }
 
-        /* Tarjetas de Estadísticas */
+        .sidebar .nav-link i { font-size: 1.2rem; }
+
+        /* Dashboard Content */
+        .content-area {
+            flex-grow: 1;
+            padding: 45px;
+            overflow-y: auto;
+        }
+
+        /* Tarjetas con Neumorfismo Suave */
         .stat-card {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 20px;
-            transition: 0.3s;
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid rgba(0, 0, 0, 0.02);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+            transition: 0.3s ease;
         }
 
         .stat-card:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateY(-5px);
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0, 74, 153, 0.1);
         }
 
         .stat-icon {
-            width: 45px;
-            height: 45px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 15px;
-            font-size: 1.5rem;
-        }
-
-        /* Tabla Estilizada */
-        .custom-table-card {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 20px;
-            border: 1px solid var(--glass-border);
-            padding: 20px;
-        }
-
-        .table { color: white; border-collapse: separate; border-spacing: 0 10px; }
-        .table thead th { border: none; color: rgba(255,255,255,0.5); font-weight: 400; font-size: 0.8rem; }
-        .table tbody tr { background: rgba(255,255,255,0.03); transition: 0.3s; }
-        .table tbody tr td { border: none; padding: 15px 10px; vertical-align: middle; }
-        .table tbody tr:hover { background: rgba(255,255,255,0.08); transform: scale(1.01); }
-        .table tbody tr td:first-child { border-radius: 15px 0 0 15px; }
-        .table tbody tr td:last-child { border-radius: 0 15px 15px 0; }
-
-        /* Badge Glow */
-        .badge-presente { background: rgba(40, 167, 69, 0.2); color: #2ecc71; border: 1px solid #2ecc71; }
-        .badge-ausente { background: rgba(231, 76, 60, 0.2); color: #e74c3c; border: 1px solid #e74c3c; }
-
-        .btn-qr {
-            background: linear-gradient(135deg, #ff9966, #ff5e62);
-            border: none;
-            font-weight: 600;
-            border-radius: 12px;
-            padding: 10px 20px;
-        }
-        
-        .avatar-circle {
-            width: 40px; height: 40px;
-            background: linear-gradient(45deg, var(--primary-blue), var(--tech-cyan));
-            border-radius: 50%;
+            width: 50px; height: 50px;
+            border-radius: 15px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 0.8rem; font-weight: 600;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+        }
+
+        /* Tabla de Estudiantes Ultra-Limpia */
+        .table-section {
+            background: white;
+            border-radius: 28px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.02);
+        }
+
+        .table thead th {
+            background: #f8fafc;
+            border: none;
+            color: #94a3b8;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            padding: 15px;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .table tbody tr:hover {
+            background: #f8fbff;
+        }
+
+        .table td { padding: 18px 15px; border: none; vertical-align: middle; }
+
+        /* Badges Minimalistas */
+        .badge-status {
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        .bg-presente { background: #e6fcf5; color: #0ca678; }
+        .bg-ausente { background: #fff5f5; color: #fa5252; }
+
+        /* Botón QR Destacado */
+        .btn-action-qr {
+            background: linear-gradient(135deg, var(--primary-blue), #007bff);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            padding: 12px 25px;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0, 74, 153, 0.2);
+            transition: 0.3s;
+        }
+
+        .btn-action-qr:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 30px rgba(0, 74, 153, 0.3);
+            color: white;
+        }
+
+        /* Avatares */
+        .student-avatar {
+            width: 42px; height: 42px;
+            background: #edf2f7;
+            color: var(--primary-blue);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -156,84 +196,85 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
 <div class="main-wrapper animate__animated animate__fadeIn">
     <aside class="sidebar d-none d-lg-block">
         <div class="text-center mb-5">
-            <div class="avatar-circle mx-auto mb-3" style="width: 70px; height: 70px; font-size: 1.5rem;">
+            <div class="student-avatar mx-auto mb-3" style="width: 80px; height: 80px; font-size: 1.8rem; background: var(--primary-blue); color: white; border-radius: 25px;">
                 <?php echo strtoupper(substr($nombre,0,1)); ?>
             </div>
-            <h6 class="mb-0 fw-bold"><?php echo $nombre; ?></h6>
-            <small class="text-white-50">Docente Principal</small>
+            <h5 class="fw-bold mb-0"><?php echo $nombre; ?></h5>
+            <span class="badge bg-light text-dark border mt-2">DOCENTE TÉCNICO</span>
         </div>
         
-        <nav class="nav flex-column">
-            <a class="nav-link active" href="#"><i class="bi bi-grid-1x2-fill me-3"></i> Dashboard</a>
-            <a class="nav-link" href="#"><i class="bi bi-person-video3 me-3"></i> Mis Clases</a>
-            <a class="nav-link" href="historial_asistencias.php"><i class="bi bi-file-earmark-bar-graph me-3"></i> Reportes</a>
-            <a class="nav-link" href="#"><i class="bi bi-gear me-3"></i> Configuración</a>
-            <div class="mt-5">
-                <a class="nav-link text-danger" href="logout.php"><i class="bi bi-power me-3"></i> Cerrar Sesión</a>
+        <nav class="nav flex-column mt-4">
+            <a class="nav-link active" href="#"><i class="bi bi-house-door-fill me-3"></i> Inicio</a>
+            <a class="nav-link" href="#"><i class="bi bi-people-fill me-3"></i> Mis Alumnos</a>
+            <a class="nav-link" href="historial_asistencias.php"><i class="bi bi-calendar-check-fill me-3"></i> Asistencias</a>
+            <a class="nav-link" href="#"><i class="bi bi-file-earmark-text-fill me-3"></i> Calificaciones</a>
+            <div style="margin-top: 100px;">
+                <a class="nav-link text-danger" href="logout.php"><i class="bi bi-box-arrow-left me-3"></i> Salir</a>
             </div>
         </nav>
     </aside>
 
-    <main class="flex-grow-1 p-4 p-lg-5" style="overflow-y: auto;">
+    <main class="content-area">
         <header class="d-flex justify-content-between align-items-center mb-5">
             <div>
-                <h3 class="fw-bold mb-1">Bienvenido, Prof. <?php echo explode(" ", $nombre)[0]; ?></h3>
-                <p class="text-white-50 mb-0">Gestión de asistencia para hoy: <?php echo date('d M, Y'); ?></p>
+                <h2 class="fw-bold mb-1">Centro de Mando</h2>
+                <p class="text-muted mb-0">Gestión de Módulo: <strong>Técnico Superior A1</strong></p>
             </div>
-            <button class="btn btn-qr animate__animated animate__pulse animate__infinite" onclick="generarQR()">
-                <i class="bi bi-qr-code-scan me-2"></i> INICIAR REGISTRO QR
-            </button>
+            <div class="d-flex gap-3">
+                <button class="btn btn-action-qr animate__animated animate__pulse animate__infinite" onclick="generarQR()">
+                    <i class="bi bi-qr-code-scan me-2"></i> REGISTRO QR DE HOY
+                </button>
+            </div>
         </header>
 
         <div class="row g-4 mb-5">
             <div class="col-md-3">
                 <div class="stat-card">
-                    <div class="stat-icon bg-primary bg-opacity-25 text-primary"><i class="bi bi-people"></i></div>
-                    <small class="text-white-50">Total Estudiantes</small>
+                    <div class="stat-icon bg-primary bg-opacity-10 text-primary"><i class="bi bi-mortarboard"></i></div>
+                    <p class="text-muted small mb-1">Total Grupo</p>
                     <h3 class="fw-bold mb-0"><?php echo $total_alumnos; ?></h3>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stat-card">
-                    <div class="stat-icon bg-success bg-opacity-25 text-success"><i class="bi bi-check2-circle"></i></div>
-                    <small class="text-white-50">Asistencia Hoy</small>
+                    <div class="stat-icon bg-success bg-opacity-10 text-success"><i class="bi bi-person-check"></i></div>
+                    <p class="text-muted small mb-1">Presentes Hoy</p>
+                    <h3 class="fw-bold mb-0"><?php echo $presentes; ?> <span class="fs-6 text-muted fw-normal">/ <?php echo $total_alumnos; ?></span></h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-info bg-opacity-10 text-info"><i class="bi bi-percent"></i></div>
+                    <p class="text-muted small mb-1">% Asistencia</p>
                     <h3 class="fw-bold mb-0"><?php echo $porcentaje_asistencia; ?>%</h3>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stat-card">
-                    <div class="stat-icon bg-warning bg-opacity-25 text-warning"><i class="bi bi-clock-history"></i></div>
-                    <small class="text-white-50">Llegadas Tarde</small>
-                    <h3 class="fw-bold mb-0">5</h3>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card border-danger border-opacity-50">
-                    <div class="stat-icon bg-danger bg-opacity-25 text-danger"><i class="bi bi-exclamation-triangle"></i></div>
-                    <small class="text-white-50">Alerta Deserción</small>
-                    <h3 class="fw-bold mb-0">2</h3>
+                    <div class="stat-icon bg-danger bg-opacity-10 text-danger"><i class="bi bi-graph-down-arrow"></i></div>
+                    <p class="text-muted small mb-1">En Riesgo</p>
+                    <h3 class="fw-bold mb-0">02</h3>
                 </div>
             </div>
         </div>
 
-        <div class="custom-table-card animate__animated animate__fadeInUp">
+        <div class="table-section animate__animated animate__fadeInUp">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="fw-bold mb-0">Lista de Grupo: <span class="text-info">Técnico A1</span></h5>
-                <div class="input-group w-25">
-                    <span class="input-group-text bg-transparent border-0 text-white-50"><i class="bi bi-search"></i></span>
-                    <input type="text" class="form-control bg-transparent border-0 text-white" placeholder="Filtrar...">
+                <h5 class="fw-bold m-0"><i class="bi bi-list-stars me-2 text-primary"></i> Seguimiento de Estudiantes</h5>
+                <div class="search-box position-relative">
+                    <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                    <input type="text" class="form-control ps-5 border-0 bg-light rounded-3" style="width: 250px;" placeholder="Buscar alumno...">
                 </div>
             </div>
 
-            <div class="table-responsive" style="max-height: 500px;">
+            <div class="table-responsive">
                 <table class="table align-middle">
                     <thead>
                         <tr>
-                            <th>ESTUDIANTE</th>
-                            <th>USUARIO</th>
-                            <th class="text-center">ESTADO HOY</th>
-                            <th class="text-center">RENDIMIENTO</th>
-                            <th class="text-center">ACCIONES</th>
+                            <th>Estudiante</th>
+                            <th>ID Usuario</th>
+                            <th class="text-center">Estado</th>
+                            <th class="text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -241,24 +282,25 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
                         <tr>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <div class="avatar-circle me-3"><?php echo substr($est['nombre'],0,2); ?></div>
-                                    <span class="fw-medium"><?php echo $est['nombre']; ?></span>
+                                    <div class="student-avatar me-3">
+                                        <?php echo strtoupper(substr($est['nombre'], 0, 1) . substr(explode(" ", $est['nombre'])[1] ?? "", 0, 1)); ?>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark"><?php echo $est['nombre']; ?></div>
+                                        <small class="text-muted">Inscrito en el curso</small>
+                                    </div>
                                 </div>
                             </td>
-                            <td><span class="text-white-50 small">@<?php echo $est['usuario']; ?></span></td>
+                            <td><code class="text-primary">@<?php echo $est['usuario']; ?></code></td>
                             <td class="text-center">
-                                <span class="badge rounded-pill <?php echo $est['estado_hoy'] == 'Presente' ? 'badge-presente' : 'badge-ausente'; ?> px-3 py-2">
-                                    <?php echo $est['estado_hoy']; ?>
+                                <span class="badge-status <?php echo $est['estado_hoy'] == 'Presente' ? 'bg-presente' : 'bg-ausente'; ?>">
+                                    <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>
+                                    <?php echo strtoupper($est['estado_hoy']); ?>
                                 </span>
                             </td>
                             <td class="text-center">
-                                <div class="progress bg-white bg-opacity-10" style="height: 6px; width: 100px; margin: 0 auto;">
-                                    <div class="progress-bar bg-info" style="width: 85%"></div>
-                                </div>
-                            </td>
-                            <td class="text-center">
-                                <button class="btn btn-sm btn-outline-light border-0"><i class="bi bi-eye"></i></button>
-                                <button class="btn btn-sm btn-outline-light border-0"><i class="bi bi-pencil-square"></i></button>
+                                <button class="btn btn-light btn-sm rounded-3 me-1" title="Ver Perfil"><i class="bi bi-eye-fill"></i></button>
+                                <button class="btn btn-light btn-sm rounded-3" title="Editar Nota"><i class="bi bi-pencil-square"></i></button>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -271,15 +313,17 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
 
 <div class="modal fade" id="modalAsistencia" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="background: #fff; border-radius: 30px;">
+        <div class="modal-content border-0" style="border-radius: 40px; overflow: hidden;">
             <div class="modal-body text-center p-5">
-                <h4 class="fw-bold text-dark mb-4">Registro de Asistencia</h4>
-                <div id="contenedorQR" class="mx-auto mb-4 p-3 bg-white shadow-sm rounded-4" style="width: fit-content;"></div>
-                <p class="text-muted small">Los estudiantes deben escanear este código para marcar su entrada.</p>
-                <div class="badge bg-primary bg-opacity-10 text-primary p-2 px-3">
-                    <i class="bi bi-clock me-2"></i> Sesión activa: Técnico Superior A1
+                <div class="mb-4">
+                    <h4 class="fw-bold text-dark">Escanear para Asistencia</h4>
+                    <p class="text-muted">El código se actualiza automáticamente</p>
                 </div>
-                <button class="btn btn-dark w-100 mt-4 py-3 rounded-4 fw-bold" data-bs-dismiss="modal">CERRAR REGISTRO</button>
+                <div id="contenedorQR" class="mx-auto p-4 bg-white rounded-5 shadow-sm mb-4" style="width: fit-content; border: 2px dashed #eee;"></div>
+                <div class="alert alert-primary border-0 rounded-4 py-3">
+                    <i class="bi bi-shield-lock-fill me-2"></i> Sesión Segura: <strong>A1-<?php echo date('His'); ?></strong>
+                </div>
+                <button class="btn btn-dark w-100 py-3 rounded-4 fw-bold mt-2" data-bs-dismiss="modal">FINALIZAR REGISTRO</button>
             </div>
         </div>
     </div>
@@ -292,7 +336,7 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
         const contenedor = document.getElementById("contenedorQR");
         contenedor.innerHTML = ""; 
         let url = window.location.origin + "/procesar_qr.php?clase=A1&fecha=<?php echo $hoy; ?>";
-        new QRCode(contenedor, { text: url, width: 220, height: 220, colorDark : "#001a33" });
+        new QRCode(contenedor, { text: url, width: 200, height: 200, colorDark : "#004a99", colorLight : "#ffffff" });
         new bootstrap.Modal(document.getElementById('modalAsistencia')).show();
     }
 </script>
