@@ -16,162 +16,221 @@ $nombre_maestro = $_SESSION["nombre"];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGA - Historial de Asistencias</title>
+    <title>SGA - Historial Tech Edition</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     
     <style>
         :root {
             --primary-blue: #004a99;
-            --accent-blue: #007bff;
-            --glass-bg: rgba(255, 255, 255, 0.9);
+            --tech-cyan: #00d4ff;
+            --deep-navy: #000b1a;
+            --glass-dark: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
         }
 
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
+            background: radial-gradient(circle at top right, #002f61, #000b1a);
             background-attachment: fixed;
             min-height: 100vh;
-            color: #333;
+            color: #ffffff;
             padding: 20px;
         }
 
+        /* Panel Principal Glassmorphism */
         .main-container {
-            background: var(--glass-bg);
+            background: rgba(0, 0, 0, 0.3);
             border-radius: 30px;
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
-            padding: 30px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            padding: 40px;
             max-width: 1200px;
             margin: auto;
-            animation: slideUp 0.6s ease-out;
         }
 
+        /* Tarjetas de Filtro */
         .filter-card {
-            background: #ffffff;
+            background: var(--glass-dark);
+            border: 1px solid var(--glass-border);
             border-radius: 20px;
-            border: none;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            padding: 25px;
         }
 
-        .custom-table thead {
-            background: var(--primary-blue);
-            color: white;
+        /* Inputs Estilo Cyberpunk */
+        .form-control, .input-group-text {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid var(--glass-border) !important;
+            color: white !important;
+            border-radius: 12px;
+        }
+
+        .form-control:focus {
+            border-color: var(--tech-cyan) !important;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+        }
+
+        /* Tablas Tecnológicas */
+        .table-container {
+            border-radius: 20px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+        }
+
+        .custom-table {
+            color: white !important;
+            margin-bottom: 0;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+
+        .custom-table thead th {
+            background: transparent;
+            color: var(--tech-cyan);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1.5px;
+            border: none;
+            padding: 20px;
         }
 
         .custom-table tbody tr {
-            transition: all 0.2s;
-            border-bottom: 1px solid #eee;
-            animation: fadeIn 0.4s ease forwards;
+            background: rgba(255, 255, 255, 0.02);
+            transition: all 0.3s ease;
         }
 
         .custom-table tbody tr:hover {
-            background-color: rgba(0, 123, 255, 0.05);
+            background: rgba(255, 255, 255, 0.08);
+            transform: scale(1.005);
         }
 
-        .btn-action {
+        .custom-table td {
+            padding: 15px 20px !important;
+            vertical-align: middle;
+            border: none !important;
+        }
+
+        /* Botones Neón */
+        .btn-tech {
             border-radius: 12px;
-            padding: 10px 20px;
+            padding: 12px 25px;
             font-weight: 600;
-            transition: 0.3s;
-        }
-
-        .btn-excel {
-            background: #1D6F42;
-            color: white;
+            transition: 0.4s;
             border: none;
         }
 
-        .btn-excel:hover {
-            background: #155231;
+        .btn-consultar {
+            background: linear-gradient(135deg, #00d4ff, #004a99);
             color: white;
-            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
         }
 
-        .bg-icon {
+        .btn-excel {
+            background: rgba(29, 111, 66, 0.2);
+            color: #2ecc71;
+            border: 1px solid #2ecc71;
+        }
+
+        .btn-excel:hover {
+            background: #1D6F42;
+            color: white;
+            box-shadow: 0 0 20px rgba(46, 204, 113, 0.4);
+        }
+
+        /* Badge de asistencia */
+        .badge-presente {
+            background: rgba(0, 255, 128, 0.1) !important;
+            color: #00ff80 !important;
+            border: 1px solid #00ff80;
+            text-shadow: 0 0 5px #00ff80;
+        }
+
+        .avatar-mini {
+            background: linear-gradient(135deg, var(--primary-blue), var(--tech-cyan));
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        .bg-icon-tech {
             position: absolute;
-            font-size: 5rem;
-            color: rgba(0,0,0,0.03);
-            right: 20px;
-            top: 20px;
-            z-index: -1;
+            font-size: 8rem;
+            color: rgba(0, 212, 255, 0.05);
+            right: -20px;
+            top: -20px;
+            z-index: 0;
+            pointer-events: none;
         }
 
-        /* Animaciones */
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .blink-cyan { animation: blinker 2s infinite alternate; }
+        @keyframes blinker { from { opacity: 1; } to { opacity: 0.4; } }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .spinner-container {
-            display: none;
-            padding: 40px;
-        }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: var(--primary-blue); border-radius: 10px; }
     </style>
 </head>
 <body>
 
-<div class="main-container position-relative">
-    <i class="bi bi-clock-history bg-icon"></i>
+<div class="main-container position-relative animate__animated animate__fadeIn">
+    <i class="bi bi-cpu bg-icon-tech"></i>
     
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-5 position-relative">
         <div>
-            <a href="dashboard.php" class="text-decoration-none small fw-bold text-primary">
-                <i class="bi bi-arrow-left"></i> Volver al Panel
+            <a href="dashboard.php" class="text-decoration-none small fw-bold text-info">
+                <i class="bi bi-chevron-left"></i> VOLVER AL TERMINAL
             </a>
-            <h2 class="fw-bold text-dark m-0">Historial de Registros</h2>
-            <p class="text-muted small">Profesor: <?php echo htmlspecialchars($nombre_maestro); ?></p>
+            <h2 class="fw-bold text-white mt-2 mb-0">Historial de <span class="text-info">Registros</span></h2>
+            <p class="text-white-50 small">Operador: <?php echo htmlspecialchars($nombre_maestro); ?> | SGA-SECURE-ID</p>
         </div>
-        <div class="bg-primary rounded-4 d-flex align-items-center justify-content-center shadow-sm" style="width: 60px; height: 60px;">
-            <i class="bi bi-qr-code-scan text-white fs-2"></i>
+        <div class="rounded-4 d-flex align-items-center justify-content-center shadow-lg" 
+             style="width: 70px; height: 70px; background: var(--glass-dark); border: 1px solid var(--tech-cyan);">
+            <i class="bi bi-database-check text-info fs-2 blink-cyan"></i>
         </div>
     </div>
 
-    <div class="card filter-card p-4 mb-4">
+    <div class="card filter-card mb-5">
         <form id="formFiltro" class="row g-3 align-items-end">
             <div class="col-md-4">
-                <label class="form-label small fw-bold text-muted">Fecha Inicio</label>
+                <label class="form-label small fw-bold text-info">RANGO INICIAL</label>
                 <div class="input-group">
-                    <span class="input-group-text bg-light border-0"><i class="bi bi-calendar-event"></i></span>
-                    <input type="date" class="form-control bg-light border-0 shadow-none" id="fecha_inicio" required>
+                    <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+                    <input type="date" class="form-control shadow-none" id="fecha_inicio" required>
                 </div>
             </div>
             <div class="col-md-4">
-                <label class="form-label small fw-bold text-muted">Fecha Fin</label>
+                <label class="form-label small fw-bold text-info">RANGO FINAL</label>
                 <div class="input-group">
-                    <span class="input-group-text bg-light border-0"><i class="bi bi-calendar-check"></i></span>
-                    <input type="date" class="form-control bg-light border-0 shadow-none" id="fecha_fin" required>
+                    <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
+                    <input type="date" class="form-control shadow-none" id="fecha_fin" required>
                 </div>
             </div>
-            <div class="col-md-4 d-flex gap-2">
-                <button type="button" id="btnConsultar" class="btn btn-primary btn-action w-100 shadow-sm">
-                    <i class="bi bi-search me-2"></i>Consultar
+            <div class="col-md-4 d-flex gap-3">
+                <button type="button" id="btnConsultar" class="btn btn-tech btn-consultar w-100">
+                    <i class="bi bi-shield-shaded me-2"></i>EJECUTAR
                 </button>
-                <button type="button" id="btnExportar" class="btn btn-excel btn-action w-100 shadow-sm">
-                    <i class="bi bi-file-earmark-excel me-2"></i>Excel
+                <button type="button" id="btnExportar" class="btn btn-tech btn-excel">
+                    <i class="bi bi-file-earmark-spreadsheet fs-5"></i>
                 </button>
             </div>
         </form>
     </div>
 
-    <div class="card filter-card p-0 overflow-hidden">
+    <div class="table-container position-relative">
         <div class="table-responsive">
-            <table class="table custom-table mb-0" id="tablaAsistencias">
+            <table class="table custom-table" id="tablaAsistencias">
                 <thead>
                     <tr>
-                        <th class="ps-4">Fecha</th>
+                        <th class="ps-4">Timestamp</th>
                         <th>Estudiante</th>
-                        <th>Usuario</th>
+                        <th>ID Usuario</th>
                         <th>Módulo</th>
                         <th class="text-center">Hora</th>
-                        <th class="pe-4 text-center">Estado</th>
+                        <th class="pe-4 text-center">Status</th>
                     </tr>
                 </thead>
                 <tbody id="tabla-body">
@@ -179,14 +238,14 @@ $nombre_maestro = $_SESSION["nombre"];
             </table>
         </div>
         
-        <div id="loading" class="text-center spinner-container">
-            <div class="spinner-border text-primary" role="status"></div>
-            <p class="text-muted mt-2 small">Buscando en los archivos...</p>
+        <div id="loading" class="text-center p-5 d-none">
+            <div class="spinner-border text-info" role="status" style="width: 3rem; height: 3rem;"></div>
+            <p class="text-info mt-3 fw-bold letter-spacing-1">SINCRONIZANDO BASE DE DATOS...</p>
         </div>
 
         <div id="no-data" class="text-center py-5">
-            <i class="bi bi-folder-x fs-1 text-muted"></i>
-            <p class="text-muted mt-2">No hay registros para mostrar. Selecciona un rango de fechas.</p>
+            <i class="bi bi-cloud-slash fs-1 text-white-50"></i>
+            <p class="text-white-50 mt-2">No se han detectado registros en el sector seleccionado.</p>
         </div>
     </div>
 </div>
@@ -203,16 +262,14 @@ document.getElementById('btnConsultar').addEventListener('click', function() {
     const noData = document.getElementById('no-data');
 
     if(!inicio || !fin) {
-        alert("Por favor selecciona ambas fechas.");
+        alert("Acceso denegado: Seleccione parámetros de fecha.");
         return;
     }
 
-    // UI Feedback
     tbody.innerHTML = '';
     noData.classList.add('d-none');
-    loading.style.display = 'block';
+    loading.classList.remove('d-none');
 
-    // Petición al Backend
     const formData = new FormData();
     formData.append('inicio', inicio);
     formData.append('fin', fin);
@@ -223,7 +280,7 @@ document.getElementById('btnConsultar').addEventListener('click', function() {
     })
     .then(response => response.json())
     .then(data => {
-        loading.style.display = 'none';
+        loading.classList.add('d-none');
         
         if(data.error) {
             alert(data.error);
@@ -238,21 +295,25 @@ document.getElementById('btnConsultar').addEventListener('click', function() {
         data.forEach((reg, index) => {
             const iniciales = reg.nombre.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
             const fila = `
-                <tr style="animation-delay: ${index * 0.05}s">
-                    <td class="ps-4 fw-bold">${reg.fecha}</td>
+                <tr class="animate__animated animate__fadeInUp" style="animation-delay: ${index * 0.05}s">
+                    <td class="ps-4">
+                        <span class="text-info fw-bold" style="font-family: monospace;">${reg.fecha}</span>
+                    </td>
                     <td>
                         <div class="d-flex align-items-center">
-                            <div class="bg-primary text-white rounded-circle me-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px; font-size: 0.75rem; font-weight: 600;">
+                            <div class="avatar-mini text-white rounded-circle me-3 d-flex align-items-center justify-content-center fw-bold" style="width: 35px; height: 35px; font-size: 0.7rem;">
                                 ${iniciales}
                             </div>
-                            <span class="small fw-semibold">${reg.nombre}</span>
+                            <span class="fw-semibold" style="color: #e0e0e0;">${reg.nombre}</span>
                         </div>
                     </td>
-                    <td class="text-muted small">@${reg.usuario}</td>
-                    <td class="small">${reg.clase}</td>
-                    <td class="text-center small">${reg.hora}</td>
+                    <td><code class="text-info opacity-75">@${reg.usuario}</code></td>
+                    <td class="small text-white-50">${reg.clase}</td>
+                    <td class="text-center fw-bold" style="color: var(--tech-cyan);">${reg.hora}</td>
                     <td class="pe-4 text-center">
-                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3">Presente</span>
+                        <span class="badge badge-presente rounded-pill px-3 py-2">
+                            <i class="bi bi-patch-check-fill me-1"></i> VERIFICADO
+                        </span>
                     </td>
                 </tr>
             `;
@@ -260,20 +321,19 @@ document.getElementById('btnConsultar').addEventListener('click', function() {
         });
     })
     .catch(error => {
-        loading.style.display = 'none';
-        alert("Error de conexión con el servidor.");
+        loading.classList.add('d-none');
+        alert("Error de enlace satelital (Servidor).");
     });
 });
 
-// Función para exportar a Excel profesionalmente
 document.getElementById('btnExportar').addEventListener('click', function() {
     const table = document.getElementById("tablaAsistencias");
     if(table.rows.length <= 1) {
-        alert("No hay datos para exportar.");
+        alert("No hay paquetes de datos para exportar.");
         return;
     }
-    const wb = XLSX.utils.table_to_book(table, {sheet: "Asistencias"});
-    XLSX.writeFile(wb, `Reporte_Asistencia_${new Date().toISOString().slice(0,10)}.xlsx`);
+    const wb = XLSX.utils.table_to_book(table, {sheet: "Historial"});
+    XLSX.writeFile(wb, `SGA_Report_${new Date().getTime()}.xlsx`);
 });
 </script>
 
