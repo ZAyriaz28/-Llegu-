@@ -301,42 +301,38 @@ window.addEventListener("load", function () {
 });
 
 function confirmarFinalizado() {
+    // Creamos el cuerpo del POST
+    const formData = new FormData();
+    formData.append("clase", "Ciberseguridad y Redes"); // El nombre de la clase de hoy
 
-    fetch("registrar_asistencia.php")
+    fetch("registrar_asistencia.php", {
+        method: "POST", // Especificamos que es POST
+        body: formData
+    })
     .then(response => response.json())
     .then(data => {
-
         const toastElement = document.getElementById('toastAsistencia');
         const toastBody = toastElement.querySelector('.toast-body');
 
         if (data.status === "ok") {
-
             toastBody.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i> Asistencia registrada correctamente.';
-
             const btn = document.getElementById("btnAsistenciaCheck");
             btn.classList.add("bg-success");
             btn.innerHTML = '<i class="bi bi-check2-circle"></i>';
             btn.onclick = null;
-
         } else if (data.status === "existe") {
-
             toastBody.innerHTML = '<i class="bi bi-info-circle-fill me-2"></i> Ya registraste asistencia hoy.';
-
         } else {
-
-            toastBody.innerHTML = '<i class="bi bi-x-circle-fill me-2"></i> Error al registrar asistencia.';
-
+            // Aquí es donde caía antes por la "Clase inválida"
+            toastBody.innerHTML = `<i class="bi bi-x-circle-fill me-2"></i> ${data.message || 'Error al registrar'}`;
         }
 
         const toast = new bootstrap.Toast(toastElement, { delay: 2000 });
         toast.show();
-
     })
-    .catch(error => {
-        console.error(error);
-    });
-
+    .catch(error => console.error("Error:", error));
 }
+
 
 </script>
 
