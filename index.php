@@ -1,4 +1,33 @@
- <!DOCTYPE html>
+<?php
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+/* Si ya está logueado, redirigir */
+
+if (isset($_SESSION["id"])) {
+
+    switch ($_SESSION["rol"]) {
+
+        case "admin":
+            header("Location: admin.php");
+            break;
+
+        case "maestro":
+            header("Location: dashboard.php");
+            break;
+
+        case "estudiante":
+            header("Location: estudiante.php");
+            break;
+    }
+
+    exit();
+}
+?>
+
+<!DOCTYPE html>
 
 <html lang="es"><head><meta charset="UTF-8">
 
