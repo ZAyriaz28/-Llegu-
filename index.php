@@ -112,20 +112,29 @@ if (isset($_SESSION["id"])) {
             color: #6c757d;
         }
         
-        /* Ajustes para el wrapper de contraseña que tenías en el código anterior */
-        .password-wrapper {
-            position: relative;
-        }
-        .toggle-icon {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            border: none;
-            background: none;
-            color: #6c757d;
-            cursor: pointer;
-        }
+        .password-wrapper .form-control {
+    padding-right: 45px; /* Deja espacio para el icono */
+}
+
+.toggle-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    color: #6c757d;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-icon:focus {
+    outline: none;
+}
+
     </style>
 </head>
 
