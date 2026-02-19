@@ -1,6 +1,6 @@
 <?php
 require_once "config/auth.php";
-require_once "config/db.php"; // Asegúrate de que este archivo contenga la conexión PDO en la variable $db
+require_once "config/db.php"; 
 
 /* Validar sesión */
 if (!isset($_SESSION["id"])) {
@@ -18,7 +18,6 @@ $nombre = $_SESSION["nombre"];
 $hoy = date('Y-m-d');
 
 // --- LÓGICA DE BASE DE DATOS ---
-// Consultamos a todos los estudiantes (rol_id = 3) y verificamos su asistencia hoy
 $sql = "SELECT 
             u.id, 
             u.nombre, 
@@ -107,9 +106,9 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
                 <small class="text-muted">Docente Técnico</small>
             </div>
             <ul class="nav flex-column">
-                <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-grid-fill me-2"></i> Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link active" href="dashboard.php"><i class="bi bi-grid-fill me-2"></i> Dashboard</a></li>
                 <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-journal-check me-2"></i> Calificaciones</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-folder me-2"></i> Unidades</a></li>
+                <li class="nav-item"><a class="nav-link" href="historial_asistencias.php"><i class="bi bi-folder me-2"></i> Unidades</a></li>
                 <li class="nav-item"><hr class="dropdown-divider"></li>
                 <li class="nav-item"><a class="nav-link text-danger" href="logout.php"><i class="bi bi-box-arrow-left me-2"></i> Salir</a></li>
             </ul>
@@ -122,7 +121,7 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
                     <button class="btn btn-dark btn-sm" onclick="generarQR()">
                         <i class="bi bi-qr-code-scan me-1"></i> QR de Hoy
                     </button>
-                    <button class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel me-1"></i> Exportar</button>
+                    <a href="historial_asistencias.php" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel me-1"></i> Exportar</a>
                 </div>
             </div>
 
@@ -246,9 +245,9 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
                             <button class="btn btn-primary py-3 fw-bold rounded-3" onclick="generarQR()">
                                 <i class="bi bi-broadcast me-2"></i> ABRIR REGISTRO QR
                             </button>
-                            <button class="btn btn-outline-secondary">
+                            <a href="historial_asistencias.php" class="btn btn-outline-secondary">
                                 <i class="bi bi-clock-history me-1"></i> Ver Sesiones Anteriores
-                            </button>
+                            </a>
                         </div>
                     </div>
 
