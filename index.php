@@ -1,9 +1,23 @@
 <?php
-
-//Requisitos para auth
-
 require_once "config/auth.php";
 
+/* Si hay sesión restaurada o activa */
+if (isset($_SESSION["id"])) {
+
+    switch ($_SESSION["rol"]) {
+        case "admin":
+            header("Location: admin.php");
+            break;
+        case "maestro":
+            header("Location: dashboard.php");
+            break;
+        case "estudiante":
+            header("Location: estudiante.php");
+            break;
+    }
+
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
