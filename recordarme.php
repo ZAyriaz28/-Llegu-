@@ -38,7 +38,7 @@ session_start();
         Recomendamos usar esta opción solo en dispositivos personales y seguros.
     </p>
 
-    <a href="index.html" class="btn btn-primary w-100 mt-3">
+    <a href="index.php" class="btn btn-primary w-100 mt-3">
         Volver al Inicio
     </a>
 </div>
