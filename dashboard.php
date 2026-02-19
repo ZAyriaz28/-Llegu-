@@ -48,14 +48,12 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
 
         body {
             font-family: 'Poppins', sans-serif;
-            /* Fondo coherente con tus capturas oscuras */
             background: radial-gradient(circle at top right, #002f61, #000b1a);
             min-height: 100vh;
             color: #ffffff;
             padding: 20px;
         }
 
-        /* Contenedor Principal en Glass Oscuro */
         .glass-panel {
             background: rgba(0, 0, 0, 0.3);
             border-radius: 30px;
@@ -66,7 +64,6 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
             overflow: hidden;
         }
 
-        /* Sidebar con transparencia sutil */
         .sidebar-light {
             background: rgba(0, 0, 0, 0.2);
             border-right: 1px solid var(--glass-border);
@@ -86,7 +83,6 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
             box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
         }
 
-        /* Tarjetas estilo "Dark Glass" */
         .card-custom {
             background: var(--glass-dark);
             border: 1px solid var(--glass-border);
@@ -95,30 +91,70 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
             transition: 0.3s;
         }
 
-        .card-custom:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-5px);
-            border-color: var(--tech-cyan);
+        /* --- MEJORAS EN LA TABLA --- */
+        .table-container { 
+            height: 420px; 
+            overflow-y: auto; 
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-blue) transparent;
+        }
+        
+        .table { 
+            color: white; 
+            margin-bottom: 0; 
+            border-collapse: separate; 
+            border-spacing: 0 10px; /* Crea el efecto de filas flotantes */
         }
 
-        /* Tabla Estilizada */
-        .table-container { height: 420px; overflow-y: auto; }
-        .table { color: white; margin-bottom: 0; }
         .table thead th {
-            background: rgba(255, 255, 255, 0.05);
+            background: transparent;
             color: var(--tech-cyan);
             font-size: 0.75rem;
             text-transform: uppercase;
             border: none;
             padding: 15px;
+            letter-spacing: 1px;
         }
-        .table tbody tr {
-            border-bottom: 1px solid var(--glass-border);
-            transition: 0.3s;
-        }
-        .table tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
 
-        /* Inputs y Textareas Tech */
+        .table tbody tr {
+            background: rgba(255, 255, 255, 0.03); /* Fondo ultra leve */
+            transition: 0.3s;
+            border-radius: 15px;
+        }
+
+        .table tbody tr:hover { 
+            background: rgba(255, 255, 255, 0.08); 
+            transform: scale(1.01);
+        }
+
+        .table td {
+            border: none !important;
+            padding: 15px !important;
+        }
+
+        /* Resalte del Nombre del Estudiante */
+        .student-name {
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+
+        /* Avatar Estilizado */
+        .avatar-tech {
+            background: linear-gradient(135deg, var(--primary-blue), var(--tech-cyan));
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+        }
+        /* -------------------------- */
+
         .form-control, .input-group-text {
             background: rgba(255, 255, 255, 0.05) !important;
             border: 1px solid var(--glass-border) !important;
@@ -126,11 +162,8 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
             border-radius: 10px;
         }
 
-        .form-control::placeholder { color: rgba(255, 255, 255, 0.3); }
-
-        /* Badges Neón */
-        .badge-presente { background: rgba(0, 255, 128, 0.1); color: #00ff80; border: 1px solid #00ff80; }
-        .badge-ausente { background: rgba(255, 71, 87, 0.1); color: #ff4757; border: 1px solid #ff4757; }
+        .badge-presente { background: rgba(0, 255, 128, 0.1); color: #00ff80; border: 1px solid #00ff80; text-shadow: 0 0 5px #00ff80; }
+        .badge-ausente { background: rgba(255, 71, 87, 0.1); color: #ff4757; border: 1px solid #ff4757; text-shadow: 0 0 5px #ff4757; }
 
         .btn-qr-neon {
             background: linear-gradient(135deg, #00d4ff, #004a99);
@@ -150,7 +183,7 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
     <div class="row g-0">
         <nav class="col-md-3 col-lg-2 sidebar-light p-4 d-none d-md-block">
             <div class="text-center mb-5">
-                <div class="rounded-circle d-inline-block p-1 mb-3" style="background: linear-gradient(135deg, var(--primary-blue), var(--tech-cyan)); shadow: 0 0 20px var(--primary-blue);">
+                <div class="rounded-circle d-inline-block p-1 mb-3" style="background: linear-gradient(135deg, var(--primary-blue), var(--tech-cyan));">
                     <div class="bg-dark rounded-circle p-3">
                         <i class="bi bi-cpu fs-3 text-info"></i>
                     </div>
@@ -188,7 +221,7 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
                                 <small class="text-white-50">Localización: Campus Central</small>
                             </div>
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" checked style="background-color: var(--tech-cyan);">
+                                <input class="form-check-input" type="checkbox" checked>
                             </div>
                         </div>
                     </div>
@@ -232,6 +265,7 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
                                 <input type="text" class="form-control" placeholder="Buscar por nombre o ID...">
                             </div>
                         </div>
+                        
                         <div class="table-container">
                             <table class="table align-middle">
                                 <thead>
@@ -246,11 +280,11 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
                                         <tr>
                                             <td>
                                                 <div class="d-flex align-items-center">
-                                                    <div class="rounded-circle me-3" style="background: var(--primary-blue); width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; border: 1px solid var(--tech-cyan);">
+                                                    <div class="rounded-circle me-3 avatar-tech">
                                                         <?php echo strtoupper(substr($est['nombre'], 0, 2)); ?>
                                                     </div>
                                                     <div>
-                                                        <div class="fw-bold small"><?php echo $est['nombre']; ?></div>
+                                                        <div class="student-name"><?php echo $est['nombre']; ?></div>
                                                         <code class="text-info" style="font-size: 0.7rem;">@<?php echo $est['usuario']; ?></code>
                                                     </div>
                                                 </div>
@@ -302,8 +336,8 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
                     <h4 class="fw-bold mt-2">Sincronización QR</h4>
                 </div>
                 <div id="contenedorQR" class="mx-auto mb-4 p-3 bg-white rounded-4" style="width: fit-content;"></div>
-                <div class="text-white-50 small mb-4">Escanee el código para validar su presencia en el sistema.</div>
-                <button class="btn btn-outline-danger w-100 py-3 rounded-pill fw-bold" data-bs-dismiss="modal">DETENER EMISIÓN</button>
+                <div class="text-white-50 small mb-4">Escanee el código para validar su presencia.</div>
+                <button class="btn btn-outline-danger w-100 py-3 rounded-pill fw-bold" data-bs-dismiss="modal">DETENER</button>
             </div>
         </div>
     </div>
