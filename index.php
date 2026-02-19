@@ -1,30 +1,9 @@
 <?php
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+//Requisitos para auth
 
-/* Si ya está logueado, redirigir */
+require_once "config/auth.php";
 
-if (isset($_SESSION["id"])) {
-
-    switch ($_SESSION["rol"]) {
-
-        case "admin":
-            header("Location: admin.php");
-            break;
-
-        case "maestro":
-            header("Location: dashboard.php");
-            break;
-
-        case "estudiante":
-            header("Location: estudiante.php");
-            break;
-    }
-
-    exit();
-}
 ?>
 
 <!DOCTYPE html>
