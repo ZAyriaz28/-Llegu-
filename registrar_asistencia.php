@@ -5,6 +5,17 @@ require_once "config/db.php";
 
 header('Content-Type: application/json');
 
+// 1. Nueva validación de seguridad por Red WiFi
+if (!esRedInatec()) {
+    http_response_code(403);
+    echo json_encode([
+        "status" => "error", 
+        "message" => "Acceso denegado: Debes estar conectado al WiFi oficial del INATEC para marcar asistencia."
+    ]);
+    exit();
+}
+//==========================================================================================================================================================
+
 // Validar sesión
 if (!isset($_SESSION["id"])) {
     http_response_code(401);
