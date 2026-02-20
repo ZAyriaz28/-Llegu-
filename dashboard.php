@@ -1,6 +1,5 @@
 <?php
-// Usamos Output Buffering para evitar el error de "headers already sent"
-ob_start(); 
+
 require_once "config/auth.php";
 require_once "config/db.php"; 
 
