@@ -1,5 +1,4 @@
 <?php
-
 require_once "config/auth.php";
 require_once "config/db.php"; 
 
@@ -42,35 +41,31 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
         :root {
             --primary-blue: #004a99;
             --tech-cyan: #00d4ff;
-            /* Variables DARK (Default) */
+            /* Valores Dark (Default) */
             --bg-gradient: radial-gradient(circle at top right, #002f61, #000b1a);
-            --panel-bg: rgba(0, 0, 0, 0.3);
-            --sidebar-bg: rgba(0, 0, 0, 0.2);
-            --card-bg: rgba(255, 255, 255, 0.05);
+            --glass-panel-bg: rgba(0, 0, 0, 0.3);
+            --glass-card-bg: rgba(255, 255, 255, 0.05);
             --glass-border: rgba(255, 255, 255, 0.1);
             --text-main: #ffffff;
             --text-muted: rgba(255, 255, 255, 0.6);
-            --table-row-bg: rgba(255, 255, 255, 0.03);
-            --shadow-color: rgba(0, 0, 0, 0.5);
+            --row-hover: rgba(255, 255, 255, 0.08);
+            --shadow: rgba(0, 0, 0, 0.5);
         }
 
-        /* --- MEJORA: MODO CLARO PREMIUM --- */
         [data-theme="light"] {
-            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            --panel-bg: rgba(255, 255, 255, 0.4);
-            --sidebar-bg: rgba(255, 255, 255, 0.3);
-            --card-bg: rgba(255, 255, 255, 0.8);
-            --glass-border: rgba(255, 255, 255, 0.9);
+            --bg-gradient: radial-gradient(circle at top right, #e0eafc, #cfdef3);
+            --glass-panel-bg: rgba(255, 255, 255, 0.4);
+            --glass-card-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.5);
             --text-main: #1a2a3a;
             --text-muted: #5a6a7a;
-            --table-row-bg: #ffffff;
-            --shadow-color: rgba(31, 38, 135, 0.1);
+            --row-hover: rgba(0, 74, 153, 0.05);
+            --shadow: rgba(0, 0, 0, 0.1);
         }
 
         body {
             font-family: 'Poppins', sans-serif;
-            background: var(--bg-gradient) !important;
-            background-attachment: fixed !important;
+            background: var(--bg-gradient);
             min-height: 100vh;
             color: var(--text-main);
             padding: 20px;
@@ -78,82 +73,144 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
         }
 
         .glass-panel {
-            background: var(--panel-bg);
+            background: var(--glass-panel-bg);
             border-radius: 30px;
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            box-shadow: 0 10px 40px var(--shadow-color);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px var(--shadow);
             border: 1px solid var(--glass-border);
             overflow: hidden;
+            transition: all 0.5s ease;
+        }
+
+        /* Botón de cambio de tema flotante */
+        .theme-switch-wrapper {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            z-index: 1100;
+        }
+
+        .btn-theme {
+            background: var(--glass-card-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            transition: all 0.4s ease;
+            box-shadow: 0 5px 15px var(--shadow);
         }
 
         .sidebar-light {
-            background: var(--sidebar-bg);
+            background: rgba(0, 0, 0, 0.1);
             border-right: 1px solid var(--glass-border);
         }
 
         .nav-link {
             color: var(--text-muted);
-            font-weight: 500;
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            transition: 0.3s;
         }
 
-        .nav-link.active {
+        .nav-link:hover, .nav-link.active {
             background: linear-gradient(90deg, var(--primary-blue), var(--tech-cyan));
             color: white !important;
-            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
         }
 
         .card-custom {
-            background: var(--card-bg);
+            background: var(--glass-card-bg);
             border: 1px solid var(--glass-border);
             border-radius: 20px;
             padding: 20px;
-            box-shadow: 0 4px 15px var(--shadow-color);
-            transition: 0.3s;
+            transition: all 0.3s ease;
         }
 
-        /* Tablas con estilo de tarjetas flotantes */
-        .table { border-spacing: 0 10px; border-collapse: separate; }
-        .table thead th { color: var(--tech-cyan) !important; border: none; padding: 15px; }
-        .table td { border: none; padding: 15px; color: var(--text-main); }
+        /* Estilos de Tabla */
+        .table { 
+            --bs-table-bg: transparent !important;
+            color: var(--text-main) !important;
+            border-spacing: 0 10px;
+            border-collapse: separate;
+        }
+
+        .table thead th {
+            color: var(--tech-cyan) !important;
+            border: none;
+            padding: 15px;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+        }
+
+        .table td {
+            background: transparent !important;
+            border: none !important;
+            padding: 15px !important;
+            color: var(--text-main) !important;
+        }
 
         .table tbody tr {
-            background: var(--table-row-bg) !important;
-            box-shadow: 0 2px 10px var(--shadow-color);
-            border-radius: 12px;
+            background: var(--glass-card-bg) !important;
             transition: 0.3s;
+            border-radius: 15px;
         }
 
-        .table tbody tr:hover { transform: translateY(-2px); filter: brightness(1.02); }
+        .table tbody tr:hover { 
+            background: var(--row-hover) !important;
+            transform: scale(1.01);
+        }
 
-        .student-name { color: var(--text-main) !important; font-weight: 600; }
-        .student-user { color: var(--primary-blue); opacity: 0.7; font-weight: 500; }
+        .student-name {
+            color: var(--text-main) !important;
+            font-weight: 600;
+        }
+
+        .student-user {
+            color: var(--tech-cyan);
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
 
         .avatar-tech {
             background: linear-gradient(135deg, var(--primary-blue), var(--tech-cyan));
-            width: 38px; height: 38px;
-            display: flex; align-items: center; justify-content: center;
-            color: white; border-radius: 50%; font-weight: bold;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: white;
+            border-radius: 50%;
         }
 
-        .btn-theme {
-            background: var(--card-bg);
-            border: 1px solid var(--glass-border);
-            color: var(--text-main);
-            width: 45px; height: 45px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 12px var(--shadow-color);
-            cursor: pointer;
+        .form-control {
+            background: var(--glass-card-bg) !important;
+            border: 1px solid var(--glass-border) !important;
+            color: var(--text-main) !important;
         }
+        .form-control::placeholder { color: var(--text-muted); }
 
-        .badge-presente { background: rgba(0, 255, 128, 0.15) !important; color: #00a854 !important; border: 1px solid #00ff80; }
-        .badge-ausente { background: rgba(255, 71, 87, 0.15) !important; color: #d63031 !important; border: 1px solid #ff4757; }
+        .badge-presente { background: rgba(0, 255, 128, 0.15) !important; color: #00ff80 !important; border: 1px solid #00ff80; }
+        .badge-ausente { background: rgba(255, 71, 87, 0.15) !important; color: #ff4757 !important; border: 1px solid #ff4757; }
 
         .btn-qr-neon {
             background: linear-gradient(135deg, #00d4ff, #004a99);
-            color: white; border: none; font-weight: 600;
-            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
+            color: white;
+            border: none;
+            font-weight: 600;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
         }
+
+        .blink-animation { animation: blinker 1.5s infinite alternate; }
+        @keyframes blinker { from { opacity: 1; } to { opacity: 0.5; } }
     </style>
 </head>
 <body>
@@ -174,7 +231,7 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
                     </div>
                 </div>
                 <h6 class="fw-bold mb-0"><?php echo $nombre; ?></h6>
-                <small class="text-info" style="font-size: 0.7rem;">MODO DOCENTE</small>
+                <small class="text-info" style="font-size: 0.7rem;">SISTEMA ACTIVO</small>
             </div>
             <ul class="nav flex-column">
                 <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
@@ -196,6 +253,20 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
             </header>
 
             <div class="row g-3 mb-5">
+                <div class="col-12">
+                    <div class="card-custom">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="fw-bold m-0"><i class="bi bi-shield-lock text-info me-2"></i>Geolocalización de sesión</h6>
+                                <small class="text-muted">Localización: Centro tecnológico, Che Guevara Somoto</small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" checked style="cursor:pointer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="col-md-3">
                     <div class="card-custom border-start border-info border-4">
                         <small class="text-muted fw-bold">ASISTENCIA</small>
@@ -208,12 +279,28 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
                         <h3 class="fw-bold my-1 text-success"><?php echo $presentes; ?></h3>
                     </div>
                 </div>
+                <div class="col-md-3">
+                    <div class="card-custom border-start border-warning border-4">
+                        <small class="text-muted fw-bold">TAREAS</small>
+                        <h3 class="fw-bold my-1 text-warning">08</h3>
+                    </div>
                 </div>
+                <div class="col-md-3">
+                    <div class="card-custom border-start border-danger border-4">
+                        <small class="text-muted fw-bold">ALERTAS</small>
+                        <h3 class="fw-bold my-1 text-danger">02</h3>
+                    </div>
+                </div>
+            </div>
 
             <div class="row g-4">
                 <div class="col-lg-8">
                     <div class="card-custom">
-                        <h6 class="fw-bold mb-4 text-info">Listado de Estudiantes: A1</h6>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h6 class="fw-bold m-0 text-info">Terminal de Estudiantes: A1</h6>
+                            <input type="text" class="form-control form-control-sm w-50" placeholder="Buscar por nombre...">
+                        </div>
+                        
                         <div class="table-responsive">
                             <table class="table align-middle">
                                 <thead>
@@ -261,6 +348,12 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
                             <i class="bi bi-broadcast me-2 blink-animation"></i> BROADCAST QR
                         </button>
                     </div>
+
+                    <div class="card-custom">
+                        <h6 class="fw-bold mb-3 text-info">Mensajería de Muro</h6>
+                        <textarea class="form-control mb-3" rows="3" placeholder="Enviar aviso..."></textarea>
+                        <button class="btn btn-outline-info w-100 btn-sm">PUBLICAR</button>
+                    </div>
                 </div>
             </div>
         </main>
@@ -269,11 +362,11 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
 
 <div class="modal fade" id="modalAsistencia" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 30px; background: var(--card-bg); border: 1px solid var(--tech-cyan) !important; backdrop-filter: blur(20px);">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 30px; background: #000b1a; border: 1px solid var(--tech-cyan) !important;">
             <div class="modal-body text-center p-5">
-                <div class="mb-4 text-info"><i class="bi bi-qr-code fs-1"></i></div>
-                <div id="contenedorQR" class="mx-auto mb-4 p-3 bg-white rounded-4" style="width: fit-content; box-shadow: 0 10px 30px rgba(0,0,0,0.1);"></div>
-                <button class="btn btn-outline-danger w-100 py-3 rounded-pill fw-bold" data-bs-dismiss="modal">CERRAR REGISTRO</button>
+                <div class="mb-4 text-info blink-animation"><i class="bi bi-qr-code fs-1"></i></div>
+                <div id="contenedorQR" class="mx-auto mb-4 p-3 bg-white rounded-4" style="width: fit-content;"></div>
+                <button class="btn btn-outline-danger w-100 py-3 rounded-pill fw-bold" data-bs-dismiss="modal">DETENER</button>
             </div>
         </div>
     </div>
@@ -287,13 +380,7 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
         const contenedor = document.getElementById("contenedorQR");
         contenedor.innerHTML = ""; 
         const url = window.location.origin + "/procesar_qr.php?clase=A1&fecha=<?php echo $hoy; ?>";
-        new QRCode(contenedor, { 
-            text: url, 
-            width: 220, 
-            height: 220, 
-            colorDark : "#000b1a",
-            colorLight : "#ffffff" 
-        });
+        new QRCode(contenedor, { text: url, width: 220, height: 220, colorDark : "#000b1a" });
         new bootstrap.Modal(document.getElementById('modalAsistencia')).show();
     }
 </script>
