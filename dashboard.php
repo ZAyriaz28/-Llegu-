@@ -1,3 +1,4 @@
+
 <?php
 require_once "config/auth.php";
 require_once "config/db.php"; 
@@ -41,36 +42,78 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
         :root {
             --primary-blue: #004a99;
             --tech-cyan: #00d4ff;
-            --deep-navy: #000b1a;
-            --glass-dark: rgba(255, 255, 255, 0.05);
+            /* Valores Dark (Default) */
+            --bg-gradient: radial-gradient(circle at top right, #002f61, #000b1a);
+            --glass-panel-bg: rgba(0, 0, 0, 0.3);
+            --glass-card-bg: rgba(255, 255, 255, 0.05);
             --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --row-hover: rgba(255, 255, 255, 0.08);
+            --shadow: rgba(0, 0, 0, 0.5);
+        }
+
+        [data-theme="light"] {
+            --bg-gradient: radial-gradient(circle at top right, #e0eafc, #cfdef3);
+            --glass-panel-bg: rgba(255, 255, 255, 0.4);
+            --glass-card-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --text-main: #1a2a3a;
+            --text-muted: #5a6a7a;
+            --row-hover: rgba(0, 74, 153, 0.05);
+            --shadow: rgba(0, 0, 0, 0.1);
         }
 
         body {
             font-family: 'Poppins', sans-serif;
-            background: radial-gradient(circle at top right, #002f61, #000b1a);
+            background: var(--bg-gradient);
             min-height: 100vh;
-            color: #ffffff;
+            color: var(--text-main);
             padding: 20px;
+            transition: all 0.5s ease;
         }
 
         .glass-panel {
-            background: rgba(0, 0, 0, 0.3);
+            background: var(--glass-panel-bg);
             border-radius: 30px;
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            box-shadow: 0 25px 50px var(--shadow);
             border: 1px solid var(--glass-border);
             overflow: hidden;
+            transition: all 0.5s ease;
+        }
+
+        /* Botón de cambio de tema flotante */
+        .theme-switch-wrapper {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            z-index: 1100;
+        }
+
+        .btn-theme {
+            background: var(--glass-card-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            transition: all 0.4s ease;
+            box-shadow: 0 5px 15px var(--shadow);
         }
 
         .sidebar-light {
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.1);
             border-right: 1px solid var(--glass-border);
         }
 
         .nav-link {
-            color: rgba(255, 255, 255, 0.6);
+            color: var(--text-muted);
             padding: 12px 20px;
             border-radius: 12px;
             margin-bottom: 8px;
@@ -84,72 +127,55 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
         }
 
         .card-custom {
-            background: var(--glass-dark);
+            background: var(--glass-card-bg);
             border: 1px solid var(--glass-border);
             border-radius: 20px;
             padding: 20px;
-            transition: 0.3s;
+            transition: all 0.3s ease;
         }
 
-        /* --- SOLUCIÓN DEFINITIVA PARA EL BLANCO DE LA TABLA --- */
-        .table-container { 
-            height: 420px; 
-            overflow-y: auto; 
-            scrollbar-width: thin;
-            scrollbar-color: var(--tech-cyan) transparent;
-        }
-        
-        /* Eliminamos fondos de Bootstrap */
+        /* Estilos de Tabla */
         .table { 
             --bs-table-bg: transparent !important;
-            --bs-table-color: white !important;
-            color: white !important;
-            margin-bottom: 0; 
-            border-collapse: separate; 
+            color: var(--text-main) !important;
             border-spacing: 0 10px;
+            border-collapse: separate;
         }
 
         .table thead th {
-            background: transparent !important;
             color: var(--tech-cyan) !important;
-            font-size: 0.75rem;
-            text-transform: uppercase;
             border: none;
             padding: 15px;
+            font-size: 0.75rem;
             letter-spacing: 1px;
         }
 
-        /* Forzamos que las celdas NO sean blancas */
         .table td {
             background: transparent !important;
             border: none !important;
             padding: 15px !important;
-            color: white !important;
+            color: var(--text-main) !important;
         }
 
         .table tbody tr {
-            background: rgba(255, 255, 255, 0.03) !important;
+            background: var(--glass-card-bg) !important;
             transition: 0.3s;
             border-radius: 15px;
         }
 
         .table tbody tr:hover { 
-            background: rgba(255, 255, 255, 0.08) !important;
+            background: var(--row-hover) !important;
             transform: scale(1.01);
         }
 
-        /* Resalte del Nombre del Estudiante */
         .student-name {
-            color: #ffffff !important;
-            font-weight: 600 !important;
-            font-size: 0.95rem;
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+            color: var(--text-main) !important;
+            font-weight: 600;
         }
 
         .student-user {
-            color: var(--tech-cyan) !important;
+            color: var(--tech-cyan);
             font-size: 0.75rem;
-            font-family: monospace;
             opacity: 0.8;
         }
 
@@ -162,18 +188,16 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
             justify-content: center;
             font-size: 0.75rem;
             font-weight: bold;
-            border: 1px solid rgba(255,255,255,0.3);
-            box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+            color: white;
+            border-radius: 50%;
         }
 
-        /* Inputs Estilizados (para el buscador) */
         .form-control {
-            background: rgba(255, 255, 255, 0.05) !important;
+            background: var(--glass-card-bg) !important;
             border: 1px solid var(--glass-border) !important;
-            color: white !important;
-            border-radius: 10px;
+            color: var(--text-main) !important;
         }
-        .form-control::placeholder { color: rgba(255,255,255,0.3); }
+        .form-control::placeholder { color: var(--text-muted); }
 
         .badge-presente { background: rgba(0, 255, 128, 0.15) !important; color: #00ff80 !important; border: 1px solid #00ff80; }
         .badge-ausente { background: rgba(255, 71, 87, 0.15) !important; color: #ff4757 !important; border: 1px solid #ff4757; }
@@ -187,10 +211,16 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
         }
 
         .blink-animation { animation: blinker 1.5s infinite alternate; }
-        @keyframes blinker { from { opacity: 1; text-shadow: 0 0 10px var(--tech-cyan); } to { opacity: 0.5; } }
+        @keyframes blinker { from { opacity: 1; } to { opacity: 0.5; } }
     </style>
 </head>
 <body>
+
+<div class="theme-switch-wrapper animate__animated animate__fadeIn">
+    <button id="theme-toggle" class="btn-theme">
+        <i id="theme-icon" class="bi bi-moon-stars-fill"></i>
+    </button>
+</div>
 
 <div class="container-fluid glass-panel p-0 animate__animated animate__fadeIn">
     <div class="row g-0">
@@ -215,14 +245,12 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
         <main class="col-md-9 col-lg-10 p-4">
             <header class="d-flex justify-content-between align-items-center mb-5">
                 <div>
-                    <h3 class="fw-bold m-0 text-white">Gestión de <span class="text-info">Módulo</span></h3>
-                    <p class="text-white-50 small mb-0">Terminal ID: SGA-MASTER-01</p>
+                    <h3 class="fw-bold m-0">Gestión de <span class="text-info">Módulo</span></h3>
+                    <p class="text-muted small mb-0">Terminal ID: SGA-MASTER-01</p>
                 </div>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-qr-neon btn-sm px-4 rounded-pill" onclick="generarQR()">
-                        <i class="bi bi-qr-code-scan me-2"></i> INICIAR REGISTRO
-                    </button>
-                </div>
+                <button class="btn btn-qr-neon btn-sm px-4 rounded-pill" onclick="generarQR()">
+                    <i class="bi bi-qr-code-scan me-2"></i> INICIAR REGISTRO
+                </button>
             </header>
 
             <div class="row g-3 mb-5">
@@ -230,8 +258,8 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
                     <div class="card-custom">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="fw-bold m-0"><i class="bi bi-shield-lock text-info me-2"></i>Geolocalizacion de sesión</h6>
-                                <small class="text-white-50">Localización: Centro tecnológico, Che Guevara somoto</small>
+                                <h6 class="fw-bold m-0"><i class="bi bi-shield-lock text-info me-2"></i>Geolocalización de sesión</h6>
+                                <small class="text-muted">Localización: Centro tecnológico, Che Guevara Somoto</small>
                             </div>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" checked style="cursor:pointer">
@@ -242,28 +270,25 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
 
                 <div class="col-md-3">
                     <div class="card-custom border-start border-info border-4">
-                        <small class="text-white-50 fw-bold">ASISTENCIA</small>
+                        <small class="text-muted fw-bold">ASISTENCIA</small>
                         <h3 class="fw-bold my-1 text-info"><?php echo $porcentaje_asistencia; ?>%</h3>
-                        <div class="progress bg-dark" style="height: 4px;">
-                            <div class="progress-bar" style="width: <?php echo $porcentaje_asistencia; ?>%"></div>
-                        </div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="card-custom border-start border-success border-4">
-                        <small class="text-white-50 fw-bold">PRESENTES</small>
+                        <small class="text-muted fw-bold">PRESENTES</small>
                         <h3 class="fw-bold my-1 text-success"><?php echo $presentes; ?></h3>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="card-custom border-start border-warning border-4">
-                        <small class="text-white-50 fw-bold">TAREAS</small>
+                        <small class="text-muted fw-bold">TAREAS</small>
                         <h3 class="fw-bold my-1 text-warning">08</h3>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="card-custom border-start border-danger border-4">
-                        <small class="text-white-50 fw-bold">ALERTAS</small>
+                        <small class="text-muted fw-bold">ALERTAS</small>
                         <h3 class="fw-bold my-1 text-danger">02</h3>
                     </div>
                 </div>
@@ -274,12 +299,10 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
                     <div class="card-custom">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h6 class="fw-bold m-0 text-info">Terminal de Estudiantes: A1</h6>
-                            <div class="input-group input-group-sm w-50">
-                                <input type="text" class="form-control" placeholder="Buscar por nombre o ID...">
-                            </div>
+                            <input type="text" class="form-control form-control-sm w-50" placeholder="Buscar por nombre...">
                         </div>
                         
-                        <div class="table-container">
+                        <div class="table-responsive">
                             <table class="table align-middle">
                                 <thead>
                                     <tr>
@@ -293,7 +316,7 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
                                         <tr>
                                             <td>
                                                 <div class="d-flex align-items-center">
-                                                    <div class="rounded-circle me-3 avatar-tech">
+                                                    <div class="avatar-tech me-3">
                                                         <?php echo strtoupper(substr($est['nombre'], 0, 2)); ?>
                                                     </div>
                                                     <div>
@@ -322,16 +345,14 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
                 <div class="col-lg-4">
                     <div class="card-custom text-center mb-4">
                         <h6 class="fw-bold mb-3">Interacción Directa</h6>
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-qr-neon py-3 fw-bold" onclick="generarQR()">
-                                <i class="bi bi-broadcast me-2 blink-animation"></i> BROADCAST QR
-                            </button>
-                        </div>
+                        <button class="btn btn-qr-neon w-100 py-3 fw-bold" onclick="generarQR()">
+                            <i class="bi bi-broadcast me-2 blink-animation"></i> BROADCAST QR
+                        </button>
                     </div>
 
                     <div class="card-custom">
                         <h6 class="fw-bold mb-3 text-info">Mensajería de Muro</h6>
-                        <textarea class="form-control mb-3" rows="3" placeholder="Enviar aviso al grupo..."></textarea>
+                        <textarea class="form-control mb-3" rows="3" placeholder="Enviar aviso..."></textarea>
                         <button class="btn btn-outline-info w-100 btn-sm">PUBLICAR</button>
                     </div>
                 </div>
@@ -344,12 +365,8 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 30px; background: #000b1a; border: 1px solid var(--tech-cyan) !important;">
             <div class="modal-body text-center p-5">
-                <div class="mb-4 text-info blink-animation">
-                    <i class="bi bi-qr-code fs-1"></i>
-                    <h4 class="fw-bold mt-2">Sincronización QR</h4>
-                </div>
+                <div class="mb-4 text-info blink-animation"><i class="bi bi-qr-code fs-1"></i></div>
                 <div id="contenedorQR" class="mx-auto mb-4 p-3 bg-white rounded-4" style="width: fit-content;"></div>
-                <div class="text-white-50 small mb-4">Escanee el código para validar su presencia.</div>
                 <button class="btn btn-outline-danger w-100 py-3 rounded-pill fw-bold" data-bs-dismiss="modal">DETENER</button>
             </div>
         </div>
@@ -358,6 +375,7 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="theme-loader.js"></script>
 <script>
     function generarQR() {
         const contenedor = document.getElementById("contenedorQR");
