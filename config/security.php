@@ -6,8 +6,8 @@
 function esRedInatec() {
     // Lista de IPs públicas autorizadas (Ejemplos)
     $ips_autorizadas = [
-        '186.77.XXX.XXX', // IP pública del centro Somoto
-        '190.92.XXX.XXX'  // Otra posible IP de salida
+        '10.253.46.54', // IP pública del centro Somoto
+        //'190.92.XXX.XXX'  // Otra posible IP de salida
     ];
 
     // Obtener la IP real del usuario
