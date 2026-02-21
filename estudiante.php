@@ -1,8 +1,9 @@
+
 <?php
 require_once "config/db.php";
 require_once "config/auth.php";
-require_once "config/funciones.php"; // Cargamos el archivo global
-require_once "config/security.php";
+require_once "config/funciones.php"; 
+require_once "config/security.php"; // <--- Archivo de seguridad de IP
 
 /* Validar rol */
 if (($_SESSION["rol"] ?? "") !== "estudiante") {
@@ -19,14 +20,13 @@ $stmtUser->execute([":id" => $usuario_id]);
 $userData = $stmtUser->fetch();
 $correo = $userData['correo'] ?? "estudiante@inatec.edu.ni";
 
-/* 2. ESTADÍSTICAS Y ALERTAS (Usando funciones globales) */
+/* 2. ESTADÍSTICAS Y ALERTAS */
 $totalClases = (int) $db->query("SELECT COUNT(DISTINCT fecha) FROM asistencias")->fetchColumn();
 $stmt = $db->prepare("SELECT COUNT(*) FROM asistencias WHERE usuario_id = :id");
 $stmt->execute([":id" => $usuario_id]);
 $asistidas = (int) $stmt->fetchColumn();
 $porcentaje = $totalClases > 0 ? round(($asistidas / $totalClases) * 100) : 0;
 
-// Verificar faltas consecutivas para la advertencia de riesgo
 $mis_faltas_seguidas = obtenerFaltasConsecutivas($db, $usuario_id, 3);
 
 /* 3. REGISTRO DE HOY */
@@ -46,7 +46,10 @@ $stmtHistorial = $db->prepare("
 $stmtHistorial->execute([":id" => $usuario_id]);
 $historial = $stmtHistorial->fetchAll();
 
-$estudiante_id_format = formatearID($usuario_id); // Usando función global
+$estudiante_id_format = formatearID($usuario_id);
+
+// --- CAMBIO: Verificar red antes de cargar ---
+$estaEnRed = esRedInatec(); 
 ?>
 
 <!DOCTYPE html>
@@ -123,6 +126,13 @@ $estudiante_id_format = formatearID($usuario_id); // Usando función global
             background: linear-gradient(135deg, var(--primary-blue), var(--tech-cyan));
         }
 
+        /* CAMBIO: Estilo para botón deshabilitado si no hay red */
+        .qr-fab.no-network {
+            background: #444 !important;
+            filter: grayscale(1);
+            cursor: not-allowed;
+        }
+
         .bottom-nav {
             position: fixed; bottom: 0; width: 100%; height: 75px;
             background: var(--glass-card); backdrop-filter: blur(20px);
@@ -162,6 +172,18 @@ $estudiante_id_format = formatearID($usuario_id); // Usando función global
     </div>
 
     <div class="main-container">
+        <?php if(!$estaEnRed): ?>
+            <div class="glass-card border-warning border-start border-4 animate__animated animate__headShake">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-wifi-off text-warning fs-3 me-3"></i>
+                    <div>
+                        <h6 class="fw-bold text-warning mb-1">FUERA DE RED</h6>
+                        <p class="small mb-0 opacity-75">Conéctate al WiFi del INATEC para marcar.</p>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <?php if($mis_faltas_seguidas >= 3): ?>
             <div class="alert-desercion animate__animated animate__shakeX">
                 <div class="d-flex align-items-center">
@@ -216,7 +238,10 @@ $estudiante_id_format = formatearID($usuario_id); // Usando función global
         </div>
     </div>
 
-    <div class="qr-fab" id="btnAsistenciaCheck" onclick="confirmarAsistencia()">
+    <div class="qr-fab <?= !$estaEnRed ? 'no-network' : '' ?>" 
+         id="btnAsistenciaCheck" 
+         data-red="<?= $estaEnRed ? 'true' : 'false' ?>"
+         onclick="confirmarAsistencia()">
         <i class="bi bi-qr-code-scan"></i>
     </div>
 
@@ -255,7 +280,6 @@ $estudiante_id_format = formatearID($usuario_id); // Usando función global
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Cambio de Temas
         const themeBtn = document.getElementById('theme-toggle');
         const themeIcon = document.getElementById('theme-icon');
         themeBtn.addEventListener('click', () => {
@@ -267,7 +291,6 @@ $estudiante_id_format = formatearID($usuario_id); // Usando función global
             themeIcon.style.color = isDark ? '#1a2a3a' : '#ffffff';
         });
 
-        // Navegación de Pestañas
         function changeTab(tabId, element) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -275,7 +298,6 @@ $estudiante_id_format = formatearID($usuario_id); // Usando función global
             element.classList.add('active');
         }
 
-        // QR de Identidad Estudiantil
         function generarQRIdentidad() {
             const cont = document.getElementById("qrcodeEstudiante");
             if(cont.innerHTML === "") {
@@ -283,7 +305,6 @@ $estudiante_id_format = formatearID($usuario_id); // Usando función global
             }
         }
 
-        // Pantalla de carga
         window.onload = () => {
             setTimeout(() => {
                 const splash = document.getElementById('splash-screen');
@@ -292,17 +313,33 @@ $estudiante_id_format = formatearID($usuario_id); // Usando función global
             }, 500);
         };
 
-        // Función de registro
+        // --- CAMBIO: Función confirmarAsistencia mejorada con IP Check ---
         function confirmarAsistencia() {
+            const fab = document.getElementById("btnAsistenciaCheck");
+            const esRedCorrecta = fab.getAttribute('data-red') === 'true';
+
+            if(!esRedCorrecta) {
+                alert("⚠️ Error de Red: Debes estar conectado al WiFi oficial del INATEC para registrar tu asistencia.");
+                return;
+            }
+
+            fab.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
             fetch("registrar_asistencia.php", { method: "POST" })
             .then(res => res.json())
             .then(data => {
                 if(data.status === "ok") {
-                    const fab = document.getElementById("btnAsistenciaCheck");
                     fab.style.background = "#198754";
                     fab.innerHTML = '<i class="bi bi-check-all"></i>';
+                    alert("✅ " + data.message);
+                } else {
+                    fab.innerHTML = '<i class="bi bi-qr-code-scan"></i>';
+                    alert("❌ " + data.message);
                 }
-                alert(data.message);
+            })
+            .catch(err => {
+                fab.innerHTML = '<i class="bi bi-qr-code-scan"></i>';
+                alert("Error crítico de conexión.");
             });
         }
     </script>
