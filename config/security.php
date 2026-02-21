@@ -1,23 +1,20 @@
 <?php
-/**
- * Valida si la IP del cliente pertenece a la red autorizada del INATEC
- *
- */
 function esRedInatec() {
-    // Lista de IPs públicas autorizadas (Ejemplos)
+    // IPs autorizadas (Asegúrate de que esta sea la IP PÚBLICA de tu centro)
     $ips_autorizadas = [
-        '10.253.46.54', // IP pública del centro Somoto
-        //'190.92.XXX.XXX'  // Otra posible IP de salida
+        '10.253.46.54', 
+        '127.0.0.1', // Para tus pruebas locales
+        '::1'        // Para pruebas locales en IPv6
     ];
 
-    // Obtener la IP real del usuario
     $ip_cliente = $_SERVER['REMOTE_ADDR'];
 
-    // En algunos servidores con proxy se usa:
+    // Priorizar la IP real si viene a través del proxy de Render
     if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        $ip_cliente = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        // A veces vienen varias IPs separadas por coma, agarramos la primera
+        $ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+        $ip_cliente = trim($ips[0]);
     }
 
     return in_array($ip_cliente, $ips_autorizadas);
 }
-?>
