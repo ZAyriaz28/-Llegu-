@@ -2,6 +2,7 @@
 
 require_once "config/auth.php";
 require_once "config/db.php";
+require_once "config/security.php";
 
 header('Content-Type: application/json');
 
