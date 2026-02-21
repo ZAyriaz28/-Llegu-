@@ -1,6 +1,7 @@
 <?php
 require_once "config/auth.php";
 require_once "config/db.php"; 
+require_once "config/funciones.php"; // <--- 1. Cargamos el archivo global
 
 if (!isset($_SESSION["id"]) || $_SESSION["rol"] !== "maestro") {
     header("Location: /index.php");
@@ -10,6 +11,7 @@ if (!isset($_SESSION["id"]) || $_SESSION["rol"] !== "maestro") {
 $nombre = $_SESSION["nombre"];
 $hoy = date('Y-m-d');
 
+// 2. Consulta mejorada para incluir faltas consecutivas usando la lógica del archivo global
 $sql = "SELECT u.id, u.nombre, u.usuario, a.fecha AS fecha_asistencia,
             CASE WHEN a.id IS NOT NULL THEN 'Presente' ELSE 'Ausente' END AS estado_hoy
         FROM usuarios u
@@ -18,11 +20,22 @@ $sql = "SELECT u.id, u.nombre, u.usuario, a.fecha AS fecha_asistencia,
 
 $stmt = $db->prepare($sql);
 $stmt->execute([':hoy' => $hoy]);
-$estudiantes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$estudiantes_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Procesamos estudiantes añadiendo el cálculo de riesgo
+$estudiantes = [];
+$presentes = 0;
+$conteo_desercion = 0;
+
+foreach($estudiantes_data as $e) {
+    // Usamos la función global para detectar faltas consecutivas
+    $e['faltas_seguidas'] = obtenerFaltasConsecutivas($db, $e['id'], 3);
+    if($e['faltas_seguidas'] >= 3) $conteo_desercion++;
+    if($e['estado_hoy'] == 'Presente') $presentes++;
+    $estudiantes[] = $e;
+}
 
 $total_alumnos = count($estudiantes);
-$presentes = 0;
-foreach($estudiantes as $e) { if($e['estado_hoy'] == 'Presente') $presentes++; }
 $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumnos) * 100) : 0;
 ?> 
    
@@ -36,13 +49,13 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-     <link rel="stylesheet" href="style-global.css">
+    <link rel="stylesheet" href="style-global.css">
     
     <style>
+        /* Mantenemos tus estilos originales */
         :root {
             --primary-blue: #004a99;
             --tech-cyan: #00d4ff;
-            /* Valores Dark (Default) */
             --bg-gradient: radial-gradient(circle at top right, #002f61, #000b1a);
             --glass-panel-bg: rgba(0, 0, 0, 0.3);
             --glass-card-bg: rgba(255, 255, 255, 0.05);
@@ -84,40 +97,25 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
             transition: all 0.5s ease;
         }
 
-        /* Botón de cambio de tema flotante */
-        .theme-switch-wrapper {
-            position: fixed;
-            top: 25px;
-            right: 25px;
-            z-index: 1100;
-        }
+        .theme-switch-wrapper { position: fixed; top: 25px; right: 25px; z-index: 1100; }
 
         .btn-theme {
             background: var(--glass-card-bg);
             border: 1px solid var(--glass-border);
             color: var(--text-main);
-            width: 45px;
-            height: 45px;
+            width: 45px; height: 45px;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             backdrop-filter: blur(10px);
             transition: all 0.4s ease;
             box-shadow: 0 5px 15px var(--shadow);
         }
 
-        .sidebar-light {
-            background: rgba(0, 0, 0, 0.1);
-            border-right: 1px solid var(--glass-border);
-        }
+        .sidebar-light { background: rgba(0, 0, 0, 0.1); border-right: 1px solid var(--glass-border); }
 
         .nav-link {
-            color: var(--text-muted);
-            padding: 12px 20px;
-            border-radius: 12px;
-            margin-bottom: 8px;
-            transition: 0.3s;
+            color: var(--text-muted); padding: 12px 20px;
+            border-radius: 12px; margin-bottom: 8px; transition: 0.3s;
         }
 
         .nav-link:hover, .nav-link.active {
@@ -129,84 +127,37 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
         .card-custom {
             background: var(--glass-card-bg);
             border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 20px;
+            border-radius: 20px; padding: 20px;
             transition: all 0.3s ease;
         }
 
-        /* Estilos de Tabla */
-        .table { 
-            --bs-table-bg: transparent !important;
-            color: var(--text-main) !important;
-            border-spacing: 0 10px;
-            border-collapse: separate;
-        }
+        .table { --bs-table-bg: transparent !important; color: var(--text-main) !important; border-spacing: 0 10px; border-collapse: separate; }
+        .table thead th { color: var(--tech-cyan) !important; border: none; padding: 15px; font-size: 0.75rem; letter-spacing: 1px; }
+        .table td { background: transparent !important; border: none !important; padding: 15px !important; color: var(--text-main) !important; }
+        .table tbody tr { background: var(--glass-card-bg) !important; transition: 0.3s; border-radius: 15px; }
+        .table tbody tr:hover { background: var(--row-hover) !important; transform: scale(1.01); }
 
-        .table thead th {
-            color: var(--tech-cyan) !important;
-            border: none;
-            padding: 15px;
-            font-size: 0.75rem;
-            letter-spacing: 1px;
-        }
-
-        .table td {
-            background: transparent !important;
-            border: none !important;
-            padding: 15px !important;
-            color: var(--text-main) !important;
-        }
-
-        .table tbody tr {
-            background: var(--glass-card-bg) !important;
-            transition: 0.3s;
-            border-radius: 15px;
-        }
-
-        .table tbody tr:hover { 
-            background: var(--row-hover) !important;
-            transform: scale(1.01);
-        }
-
-        .student-name {
-            color: var(--text-main) !important;
-            font-weight: 600;
-        }
-
-        .student-user {
-            color: var(--tech-cyan);
-            font-size: 0.75rem;
-            opacity: 0.8;
-        }
+        .student-name { color: var(--text-main) !important; font-weight: 600; }
+        .student-user { color: var(--tech-cyan); font-size: 0.75rem; opacity: 0.8; }
 
         .avatar-tech {
             background: linear-gradient(135deg, var(--primary-blue), var(--tech-cyan));
-            width: 38px;
-            height: 38px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            font-weight: bold;
-            color: white;
-            border-radius: 50%;
+            width: 38px; height: 38px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; font-weight: bold; color: white; border-radius: 50%;
         }
 
-        .form-control {
-            background: var(--glass-card-bg) !important;
-            border: 1px solid var(--glass-border) !important;
-            color: var(--text-main) !important;
-        }
+        .form-control { background: var(--glass-card-bg) !important; border: 1px solid var(--glass-border) !important; color: var(--text-main) !important; }
         .form-control::placeholder { color: var(--text-muted); }
 
         .badge-presente { background: rgba(0, 255, 128, 0.15) !important; color: #00ff80 !important; border: 1px solid #00ff80; }
         .badge-ausente { background: rgba(255, 71, 87, 0.15) !important; color: #ff4757 !important; border: 1px solid #ff4757; }
+        /* Nueva insignia de Riesgo */
+        .badge-riesgo { background: rgba(255, 193, 7, 0.1) !important; color: #ffc107 !important; border: 1px solid #ffc107; font-size: 0.65rem; }
 
         .btn-qr-neon {
             background: linear-gradient(135deg, #00d4ff, #004a99);
-            color: white;
-            border: none;
-            font-weight: 600;
+            color: white; border: none; font-weight: 600;
             box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
         }
 
@@ -254,20 +205,6 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
             </header>
 
             <div class="row g-3 mb-5">
-                <div class="col-12">
-                    <div class="card-custom">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="fw-bold m-0"><i class="bi bi-shield-lock text-info me-2"></i>Geolocalización de sesión</h6>
-                                <small class="text-muted">Localización: Centro tecnológico, Che Guevara Somoto</small>
-                            </div>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" checked style="cursor:pointer">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="col-md-3">
                     <div class="card-custom border-start border-info border-4">
                         <small class="text-muted fw-bold">ASISTENCIA</small>
@@ -281,15 +218,15 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card-custom border-start border-warning border-4">
-                        <small class="text-muted fw-bold">TAREAS</small>
-                        <h3 class="fw-bold my-1 text-warning">08</h3>
+                    <div class="card-custom border-start border-danger border-4">
+                        <small class="text-muted fw-bold">EN DESERCIÓN</small>
+                        <h3 class="fw-bold my-1 text-danger"><?php echo $conteo_desercion; ?></h3>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card-custom border-start border-danger border-4">
-                        <small class="text-muted fw-bold">ALERTAS</small>
-                        <h3 class="fw-bold my-1 text-danger">02</h3>
+                    <div class="card-custom border-start border-warning border-4">
+                        <small class="text-muted fw-bold">TAREAS PEND.</small>
+                        <h3 class="fw-bold my-1 text-warning">08</h3>
                     </div>
                 </div>
             </div>
@@ -308,6 +245,7 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
                                     <tr>
                                         <th>ESTUDIANTE</th>
                                         <th class="text-center">ESTADO</th>
+                                        <th class="text-center">ALERTAS</th>
                                         <th class="text-center">ACCIONES</th>
                                     </tr>
                                 </thead>
@@ -329,6 +267,15 @@ $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumn
                                                 <span class="badge rounded-pill <?php echo ($est['estado_hoy'] === 'Presente') ? 'badge-presente' : 'badge-ausente'; ?> px-3 py-2">
                                                     <?php echo strtoupper($est['estado_hoy']); ?>
                                                 </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <?php if($est['faltas_seguidas'] >= 3): ?>
+                                                    <span class="badge rounded-pill badge-riesgo animate__animated animate__pulse animate__infinite">
+                                                        <i class="bi bi-exclamation-triangle-fill me-1"></i> RIESGO
+                                                    </span>
+                                                <?php else: ?>
+                                                    <small class="text-muted-custom">Estable</small>
+                                                <?php endif; ?>
                                             </td>
                                             <td class="text-center">
                                                 <button class="btn btn-sm text-info"><i class="bi bi-eye"></i></button>
