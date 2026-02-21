@@ -1,0 +1,5 @@
+ Sufijo DNS específico para la conexión. . : inatec.edu.ni
+   Vínculo: dirección IPv6 local. . . : fe80::eb4d:a46e:97e3:b541%5
+   Dirección IPv4. . . . . . . . . . . . . . : 10.253.46.54
+   Máscara de subred . . . . . . . . . . . . : 255.255.255.0
+   Puerta de enlace predeterminada . . . . . : 10.253.46.1
