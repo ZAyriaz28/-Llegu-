@@ -2,6 +2,7 @@
 require_once "config/db.php";
 require_once "config/auth.php";
 require_once "config/funciones.php"; // Cargamos el archivo global
+require_once "config/security.php";
 
 /* Validar rol */
 if (($_SESSION["rol"] ?? "") !== "estudiante") {
