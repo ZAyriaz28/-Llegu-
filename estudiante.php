@@ -1,5 +1,5 @@
 <?php
-// 1. INICIO DE SESIÓN Y SEGURIDAD (Sin espacios antes del <?php)
+// 1. INICIO DE SESIÓN Y SEGURIDAD
 require_once "config/auth.php"; 
 require_once "config/db.php";
 require_once "config/funciones.php"; 
@@ -53,15 +53,35 @@ $historial = $stmtHistorial->fetchAll();
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #00d4ff;
-            --accent: #004a99;
+            /* MODO OSCURO (Default) */
+            --bg-body: radial-gradient(circle at top right, #001f3f, #00050a);
+            --text-main: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.7);
             --glass: rgba(255, 255, 255, 0.08);
-            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --primary: #00d4ff;
+            --nav-bg: rgba(0, 0, 0, 0.4);
         }
+
+        [data-theme="light"] {
+            /* MODO CLARO */
+            --bg-body: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --text-main: #1a2a3a;
+            --text-muted: #5a6a7a;
+            --glass: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(0, 0, 0, 0.1);
+            --primary: #007bff;
+            --nav-bg: rgba(255, 255, 255, 0.8);
+        }
+
         body { 
-            background: radial-gradient(circle at top right, #001f3f, #00050a); 
-            color: #fff; font-family: 'Inter', sans-serif; min-height: 100vh;
+            background: var(--bg-body) !important; 
+            color: var(--text-main); 
+            font-family: 'Inter', sans-serif; 
+            min-height: 100vh;
+            transition: all 0.3s ease;
         }
+
         .glass-card {
             background: var(--glass);
             backdrop-filter: blur(12px);
@@ -69,58 +89,85 @@ $historial = $stmtHistorial->fetchAll();
             border-radius: 20px;
             padding: 1.5rem;
             margin-bottom: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
+
+        .text-muted { color: var(--text-muted) !important; }
+        h1, h2, h3, h4, h5, h6 { color: var(--text-main); }
+
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
+        /* Selector de Tema */
+        .theme-toggle {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            width: 40px; height: 40px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
+
         /* FAB Asistencia */
         .qr-fab {
             position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
             width: 65px; height: 65px; border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
+            background: linear-gradient(135deg, #00d4ff, #004a99);
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 8px 25px rgba(0, 212, 255, 0.4);
             cursor: pointer; z-index: 1000; transition: 0.3s;
+            color: white !important;
         }
         .qr-fab.disabled { filter: grayscale(1); opacity: 0.5; cursor: not-allowed; }
 
         /* Nav Bottom */
         .bottom-nav {
             position: fixed; bottom: 0; width: 100%; height: 75px;
-            background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(20px);
+            background: var(--nav-bg); backdrop-filter: blur(20px);
             display: flex; justify-content: space-around; align-items: center;
             border-top: 1px solid var(--glass-border);
+            z-index: 999;
         }
-        .nav-item { color: rgba(255,255,255,0.5); font-size: 1.2rem; cursor: pointer; text-align: center; }
+        .nav-item { color: var(--text-muted); font-size: 1.2rem; cursor: pointer; text-align: center; text-decoration: none; }
         .nav-item.active { color: var(--primary); }
-        .nav-label { font-size: 0.65rem; display: block; }
+        .nav-label { font-size: 0.65rem; display: block; margin-top: 2px; }
+
+        /* Progress Bar */
+        .progress-container { height: 8px; background: rgba(127,127,127,0.2); border-radius: 10px; overflow: hidden; }
     </style>
 </head>
-<body>
+<body data-theme="dark">
 
 <div class="container pt-4 pb-5" style="max-width: 450px;">
     
     <div class="d-flex justify-content-between align-items-center mb-4 px-2">
         <div>
             <h5 class="mb-0 fw-bold">Hola, <?= explode(' ', $nombre)[0] ?></h5>
-            <span class="badge bg-info text-dark" style="font-size: 0.6rem;">ID: <?= $estudiante_id_format ?></span>
+            <span class="badge bg-info text-dark" style="font-size: 0.65rem; font-weight: 600;">ESTUDIANTE</span>
         </div>
-        <img src="https://ui-avatars.com/api/?name=<?= $nombre ?>&background=00d4ff&color=000" class="rounded-circle border border-2 border-info" width="45">
+        <div class="d-flex gap-2 align-items-center">
+            <div class="theme-toggle" id="themeBtn" onclick="toggleTheme()">
+                <i class="bi bi-moon-stars" id="themeIcon"></i>
+            </div>
+            <img src="https://ui-avatars.com/api/?name=<?= $nombre ?>&background=00d4ff&color=000" class="rounded-circle border border-2 border-info" width="42">
+        </div>
     </div>
 
     <?php if(!$estaEnRed): ?>
-        <div class="alert alert-warning py-2 rounded-4 border-0 mb-4" style="background: rgba(255, 193, 7, 0.15); color: #ffca2c;">
-            <i class="bi bi-wifi-off me-2"></i> <small>Conéctate al WiFi del centro para marcar.</small>
+        <div class="alert alert-warning py-2 rounded-4 border-0 mb-4 d-flex align-items-center" style="background: rgba(255, 193, 7, 0.15); color: #ffca2c;">
+            <i class="bi bi-wifi-off fs-5 me-2"></i> 
+            <small class="fw-medium">Conéctate al WiFi del centro para marcar asistencia.</small>
         </div>
     <?php endif; ?>
 
     <div id="home" class="tab-content active">
         <div class="glass-card text-center">
-            <span class="text-muted small">MI ASISTENCIA TOTAL</span>
-            <h2 class="fw-bold my-1"><?= $porcentaje ?>%</h2>
-            <div class="progress mt-2" style="height: 6px; background: rgba(255,255,255,0.1);">
-                <div class="progress-bar bg-info" style="width: <?= $porcentaje ?>%"></div>
+            <span class="text-muted small fw-bold text-uppercase tracking-wider">Mi Asistencia Total</span>
+            <h2 class="fw-bold my-2" style="font-size: 2.5rem;"><?= $porcentaje ?>%</h2>
+            <div class="progress-container">
+                <div style="width: <?= $porcentaje ?>%; height: 100%; background: var(--primary);"></div>
             </div>
         </div>
 
@@ -129,18 +176,20 @@ $historial = $stmtHistorial->fetchAll();
             <p class="small text-muted mb-0"><i class="bi bi-geo-alt me-1"></i> Laboratorio A1 - Somoto</p>
         </div>
 
-        <div class="glass-card text-center border-info border-opacity-25" style="border-style: dashed;">
+        <div class="glass-card text-center border-info border-opacity-25" style="border-style: dashed; background: rgba(0, 212, 255, 0.03);">
             <p class="small text-info mb-1 fw-bold">LLAVE DINÁMICA</p>
-            <h4 class="font-monospace mb-0"><?= date('H') ?>•<?= substr(md5($usuario_id), 0, 4) ?>•<?= date('i') ?></h4>
+            <h4 class="font-monospace mb-0 fw-bold" style="letter-spacing: 2px;">
+                <?= date('H') ?>•<?= substr(md5($usuario_id), 0, 4) ?>•<?= date('i') ?>
+            </h4>
         </div>
     </div>
 
     <div id="historial" class="tab-content">
-        <h6 class="mb-3 ps-2">Historial Reciente</h6>
+        <h6 class="mb-3 ps-2 fw-bold">Historial de Clases</h6>
         <?php foreach($historial as $h): ?>
             <div class="glass-card py-2 d-flex justify-content-between align-items-center">
-                <span class="small"><?= date('d/m/Y', strtotime($h['fecha'])) ?></span>
-                <span class="badge <?= $h['estado']=='Presente' ? 'bg-success':'bg-danger' ?> bg-opacity-25 text-<?= $h['estado']=='Presente' ? 'success':'danger' ?>">
+                <span class="fw-medium small"><?= date('d/m/Y', strtotime($h['fecha'])) ?></span>
+                <span class="badge rounded-pill <?= $h['estado']=='Presente' ? 'bg-success':'bg-danger' ?> bg-opacity-25 text-<?= $h['estado']=='Presente' ? 'success':'danger' ?>" style="font-size: 0.7rem;">
                     <?= $h['estado'] ?>
                 </span>
             </div>
@@ -149,16 +198,17 @@ $historial = $stmtHistorial->fetchAll();
 
     <div id="id-digital" class="tab-content text-center">
         <div class="glass-card py-4">
-            <div id="qrcode" class="d-flex justify-content-center mb-3"></div>
-            <h5 class="fw-bold mb-0"><?= $nombre ?></h5>
-            <p class="text-muted small"><?= $correo ?></p>
+            <div id="qrcode" class="d-flex justify-content-center mb-3 p-3 bg-white rounded-4 shadow-sm mx-auto" style="width: fit-content;"></div>
+            <h5 class="fw-bold mb-1"><?= $nombre ?></h5>
+            <p class="text-info small font-monospace mb-0"><?= $estudiante_id_format ?></p>
+            <p class="text-muted small mt-2"><?= $correo ?></p>
         </div>
     </div>
 
 </div>
 
 <div class="qr-fab <?= !$estaEnRed ? 'disabled' : '' ?>" id="btnAsistencia" onclick="marcarAsistencia()">
-    <i class="bi bi-qr-code-scan fs-2 text-white"></i>
+    <i class="bi bi-qr-code-scan fs-2"></i>
 </div>
 
 <nav class="bottom-nav">
@@ -170,7 +220,7 @@ $historial = $stmtHistorial->fetchAll();
     </div>
     <div style="width: 60px;"></div>
     <div class="nav-item" onclick="showTab('id-digital', this); generateQR();">
-        <i class="bi bi-person-badge"></i><span class="nav-label">Carnet</span>
+        <i class="bi bi-person-badge"></i><span class="nav-label">ID Tech</span>
     </div>
     <div class="nav-item" onclick="window.location.href='logout.php'">
         <i class="bi bi-box-arrow-right"></i><span class="nav-label">Salir</span>
@@ -179,6 +229,7 @@ $historial = $stmtHistorial->fetchAll();
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
+    // Cambio de Pestañas
     function showTab(id, el) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -186,16 +237,39 @@ $historial = $stmtHistorial->fetchAll();
         el.classList.add('active');
     }
 
-    function generateQR() {
-        const qrBox = document.getElementById("qrcode");
-        if(qrBox.innerHTML === "") {
-            new QRCode(qrBox, { text: "<?= $estudiante_id_format ?>", width: 180, height: 180, colorDark : "#000000", colorLight : "#ffffff" });
+    // Cambio de Tema (Sol / Luna)
+    function toggleTheme() {
+        const body = document.body;
+        const icon = document.getElementById('themeIcon');
+        const currentTheme = body.getAttribute('data-theme');
+        
+        if (currentTheme === 'dark') {
+            body.setAttribute('data-theme', 'light');
+            icon.className = 'bi bi-sun';
+        } else {
+            body.setAttribute('data-theme', 'dark');
+            icon.className = 'bi bi-moon-stars';
         }
     }
 
+    // Generar QR para el Carnet
+    function generateQR() {
+        const qrBox = document.getElementById("qrcode");
+        if(qrBox.innerHTML === "") {
+            new QRCode(qrBox, { 
+                text: "<?= $estudiante_id_format ?>", 
+                width: 160, height: 160, 
+                colorDark : "#000000", 
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        }
+    }
+
+    // Lógica de Asistencia
     function marcarAsistencia() {
         if(<?= $estaEnRed ? 'false' : 'true' ?>) {
-            alert("No estás conectado a la red autorizada.");
+            alert("Acceso denegado: No estás conectado al WiFi del centro.");
             return;
         }
         const btn = document.getElementById('btnAsistencia');
@@ -207,8 +281,8 @@ $historial = $stmtHistorial->fetchAll();
             alert(data.message);
             location.reload();
         }).catch(() => {
-            alert("Error de conexión");
-            btn.innerHTML = '<i class="bi bi-qr-code-scan fs-2 text-white"></i>';
+            alert("Error de comunicación con el servidor.");
+            btn.innerHTML = '<i class="bi bi-qr-code-scan fs-2"></i>';
         });
     }
 </script>
