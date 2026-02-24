@@ -1,5 +1,7 @@
 <?php
 
+date_default_timezone_set('America/Managua');
+
 require_once "config/auth.php";
 require_once "config/db.php";
 require_once "config/security.php";
