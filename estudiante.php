@@ -229,36 +229,49 @@ $historial = $stmtHistorial->fetchAll();
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-    // Cambio de Pestañas
+    // 1. Cambio de Pestañas (Corregido para asegurar que los IDs existan)
     function showTab(id, el) {
+        const targetTab = document.getElementById(id);
+        if (!targetTab) return; // Seguridad: si la pestaña no existe, no hace nada
+
+        // Ocultar todas las pestañas
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        // Quitar estado activo a todos los iconos de navegación
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        el.classList.add('active');
+        
+        // Mostrar la seleccionada
+        targetTab.classList.add('active');
+        if (el) el.classList.add('active');
     }
 
-    // Cambio de Tema (Sol / Luna)
+    // 2. Cambio de Tema (Con persistencia opcional)
     function toggleTheme() {
         const body = document.body;
         const icon = document.getElementById('themeIcon');
+        if (!icon) return;
+
         const currentTheme = body.getAttribute('data-theme');
-        
         if (currentTheme === 'dark') {
             body.setAttribute('data-theme', 'light');
             icon.className = 'bi bi-sun';
+            icon.style.color = '#1a2a3a';
         } else {
             body.setAttribute('data-theme', 'dark');
             icon.className = 'bi bi-moon-stars';
+            icon.style.color = '#ffffff';
         }
     }
 
-    // Generar QR para el Carnet
+    // 3. Generar QR para el Carnet (Corregido ID)
     function generateQR() {
         const qrBox = document.getElementById("qrcode");
-        if(qrBox.innerHTML === "") {
+        if (!qrBox) return;
+
+        if (qrBox.innerHTML.trim() === "") {
             new QRCode(qrBox, { 
                 text: "<?= $estudiante_id_format ?>", 
-                width: 160, height: 160, 
+                width: 160, 
+                height: 160, 
                 colorDark : "#000000", 
                 colorLight : "#ffffff",
                 correctLevel : QRCode.CorrectLevel.H
@@ -266,32 +279,35 @@ $historial = $stmtHistorial->fetchAll();
         }
     }
 
-        // Lógica de Asistencia Mejorada
+    // 4. Lógica de Asistencia (Sincronizada con el botón flotante)
     function marcarAsistencia() {
-        // 1. Verificación de seguridad de red (Lado del cliente)
-        if(<?= $estaEnRed ? 'false' : 'true' ?>) {
+        // Verificación de red desde PHP
+        const estaEnRed = <?= $estaEnRed ? 'true' : 'false' ?>;
+        
+        if (!estaEnRed) {
             alert("⚠️ Acceso denegado: Debes estar conectado al WiFi oficial del centro.");
             return;
         }
 
         const btn = document.getElementById('btnAsistencia');
+        if (!btn) return;
+
         const iconOriginal = '<i class="bi bi-qr-code-scan fs-2"></i>';
         
-        // 2. Estado de carga
+        // Estado de carga
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-        btn.style.pointerEvents = 'none'; // Evita doble clic
+        btn.style.pointerEvents = 'none'; 
 
         fetch("registrar_asistencia.php", { 
             method: "POST" 
         })
         .then(r => r.json())
         .then(data => {
-            // 3. Manejo de respuestas según el estado
-            if(data.status === "ok") {
+            if (data.status === "ok") {
                 alert("✅ " + (data.message || "Asistencia registrada con éxito"));
-                location.reload(); // Recarga para actualizar historial y porcentaje
+                location.reload(); 
             } 
-            else if(data.status === "existe") {
+            else if (data.status === "existe") {
                 alert("ℹ️ " + (data.message || "Ya habías registrado tu asistencia hoy."));
                 btn.innerHTML = iconOriginal;
                 btn.style.pointerEvents = 'auto';
@@ -304,11 +320,18 @@ $historial = $stmtHistorial->fetchAll();
         })
         .catch(err => {
             console.error("Error:", err);
-            alert("🚨 Error de comunicación con el servidor. Intenta de nuevo.");
+            alert("🚨 Error de comunicación con el servidor.");
             btn.innerHTML = iconOriginal;
             btn.style.pointerEvents = 'auto';
         });
     }
+
+    // Auto-ejecución al cargar (Opcional: para limpiar splash screen si lo tienes)
+    window.onload = () => {
+        console.log("Sistema SGA Cargado correctamente.");
+    };
+</script>
+
 
 
 </body>
