@@ -266,26 +266,50 @@ $historial = $stmtHistorial->fetchAll();
         }
     }
 
-    // Lógica de Asistencia
+        // Lógica de Asistencia Mejorada
     function marcarAsistencia() {
+        // 1. Verificación de seguridad de red (Lado del cliente)
         if(<?= $estaEnRed ? 'false' : 'true' ?>) {
-            alert("Acceso denegado: No estás conectado al WiFi del centro.");
+            alert("⚠️ Acceso denegado: Debes estar conectado al WiFi oficial del centro.");
             return;
         }
+
         const btn = document.getElementById('btnAsistencia');
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        const iconOriginal = '<i class="bi bi-qr-code-scan fs-2"></i>';
         
-        fetch("registrar_asistencia.php", { method: "POST" })
+        // 2. Estado de carga
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        btn.style.pointerEvents = 'none'; // Evita doble clic
+
+        fetch("registrar_asistencia.php", { 
+            method: "POST" 
+        })
         .then(r => r.json())
         .then(data => {
-            alert(data.message);
-            location.reload();
-        }).catch(() => {
-            alert("Error de comunicación con el servidor.");
-            btn.innerHTML = '<i class="bi bi-qr-code-scan fs-2"></i>';
+            // 3. Manejo de respuestas según el estado
+            if(data.status === "ok") {
+                alert("✅ " + (data.message || "Asistencia registrada con éxito"));
+                location.reload(); // Recarga para actualizar historial y porcentaje
+            } 
+            else if(data.status === "existe") {
+                alert("ℹ️ " + (data.message || "Ya habías registrado tu asistencia hoy."));
+                btn.innerHTML = iconOriginal;
+                btn.style.pointerEvents = 'auto';
+            } 
+            else {
+                alert("❌ Error: " + data.message);
+                btn.innerHTML = iconOriginal;
+                btn.style.pointerEvents = 'auto';
+            }
+        })
+        .catch(err => {
+            console.error("Error:", err);
+            alert("🚨 Error de comunicación con el servidor. Intenta de nuevo.");
+            btn.innerHTML = iconOriginal;
+            btn.style.pointerEvents = 'auto';
         });
     }
-</script>
+
 
 </body>
 </html>
