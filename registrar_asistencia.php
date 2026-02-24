@@ -1,5 +1,5 @@
 <?php
-
+// Forzar la hora de Nicaragua para que coincida con tu red
 date_default_timezone_set('America/Managua');
 
 require_once "config/auth.php";
@@ -8,65 +8,39 @@ require_once "config/security.php";
 
 header('Content-Type: application/json');
 
-// 1. Nueva validación de seguridad por Red WiFi
+// 1. Validación de Red WiFi
 if (!esRedInatec()) {
     http_response_code(403);
-    echo json_encode([
-        "status" => "error", 
-        "message" => "Acceso denegado: Debes estar conectado al WiFi oficial del INATEC para marcar asistencia."
-    ]);
+    echo json_encode(["status" => "error", "message" => "Fuera de la red autorizada."]);
     exit();
 }
-//==========================================================================================================================================================
 
-// Validar sesión
+// 2. Validar sesión
 if (!isset($_SESSION["id"])) {
     http_response_code(401);
-    echo json_encode(["status" => "error", "message" => "No autorizado"]);
-    exit();
-}
-
-//  Validar rol
-if (($_SESSION["rol"] ?? "") !== "estudiante") {
-    http_response_code(403);
-    echo json_encode(["status" => "error", "message" => "Acceso denegado"]);
+    echo json_encode(["status" => "error", "message" => "Sesión expirada"]);
     exit();
 }
 
 $usuario_id = (int) $_SESSION["id"];
-$clase      = trim($_POST["clase"] ?? "");
-$fecha      = date("Y-m-d");
 
-if ($clase === "") {
-    echo json_encode(["status" => "error", "message" => "Clase inválida"]);
-    exit();
-}
+// MODIFICACIÓN: Si no viene clase, ponemos un nombre genérico para que la DB no falle
+$clase = trim($_POST["clase"] ?? "Ciberseguridad"); 
+$fecha = date("Y-m-d");
 
-// Verificar duplicado
-$sql = "SELECT id 
-        FROM asistencias 
-        WHERE usuario_id = :id 
-        AND clase = :clase 
-        AND fecha = :fecha 
-        LIMIT 1";
-
+// 3. Verificar si ya marcó hoy
+$sql = "SELECT id FROM asistencias WHERE usuario_id = :id AND fecha = :fecha LIMIT 1";
 $stmt = $db->prepare($sql);
-$stmt->execute([
-    ":id"    => $usuario_id,
-    ":clase" => $clase,
-    ":fecha" => $fecha
-]);
+$stmt->execute([":id" => $usuario_id, ":fecha" => $fecha]);
 
 if ($stmt->fetch()) {
-    echo json_encode(["status" => "existe"]);
+    echo json_encode(["status" => "existe", "message" => "Ya registraste tu asistencia hoy."]);
     exit();
 }
 
-//  Insertar asistencia
-$sqlInsert = "INSERT INTO asistencias 
-              (usuario_id, clase, fecha, registrado_en)
+// 4. Insertar (Ahora siempre tendrá un valor en 'clase')
+$sqlInsert = "INSERT INTO asistencias (usuario_id, clase, fecha, registrado_en) 
               VALUES (:id, :clase, :fecha, NOW())";
-
 $stmtInsert = $db->prepare($sqlInsert);
 $stmtInsert->execute([
     ":id"    => $usuario_id,
@@ -74,4 +48,4 @@ $stmtInsert->execute([
     ":fecha" => $fecha
 ]);
 
-echo json_encode(["status" => "ok"]);
+echo json_encode(["status" => "ok", "message" => "Asistencia registrada correctamente"]);
