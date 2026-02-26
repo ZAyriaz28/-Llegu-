@@ -83,11 +83,12 @@ try {
             margin-bottom: 1.5rem;
         }
 
-        /* Mejora contraste texto estadísticas */
+        /* CORRECCIÓN: El texto ahora usa la variable --text-main para cambiar con el tema */
         .glass-card small.text-muted.fw-bold {
-            color: #ffffff !important;
-            text-shadow: 0 0 5px rgba(255,255,255,0.2);
-            opacity: 1 !important;
+            color: var(--text-main) !important;
+            opacity: 0.85;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .theme-toggle {
@@ -129,8 +130,8 @@ try {
         }
 
         #studentSearch {
-            background: rgba(0, 0, 0, 0.3) !important;
-            color: white !important;
+            background: var(--glass) !important;
+            color: var(--text-main) !important;
             border: 1px solid var(--glass-border) !important;
             padding-left: 2.8rem !important;
             border-radius: 12px;
@@ -231,7 +232,7 @@ try {
                                         <div class="bg-primary bg-opacity-10 text-primary rounded-circle me-3 d-flex align-items-center justify-content-center fw-bold" style="width: 35px; height: 35px; font-size: 0.8rem;">
                                             <?= substr($est['nombre'], 0, 2) ?>
                                         </div>
-                                        <span class="fw-semibold student-name text-white"><?= $est['nombre'] ?></span>
+                                        <span class="fw-semibold student-name"><?= $est['nombre'] ?></span>
                                     </div>
                                 </td>
                                 <td class="text-center student-user">@<?= $est['usuario'] ?></td>
