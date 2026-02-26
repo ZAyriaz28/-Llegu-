@@ -1,338 +1,279 @@
 <?php
-// 1. INICIO DE SESIÓN Y SEGURIDAD
-require_once "config/auth.php"; 
-require_once "config/db.php";
-require_once "config/funciones.php"; 
-require_once "config/security.php"; 
+// 1. CONFIGURACIÓN DE ENTORNO Y SEGURIDAD
+date_default_timezone_set('America/Managua');
+require_once "config/auth.php";
+require_once "config/db.php"; 
 
-if (($_SESSION["rol"] ?? "") !== "estudiante") {
+if (!isset($_SESSION["id"]) || $_SESSION["rol"] !== "maestro") {
     header("Location: /index.php");
     exit();
 }
 
-$usuario_id = (int) $_SESSION["id"];
-$nombre     = $_SESSION["nombre"];
+$nombre = $_SESSION["nombre"];
+$hoy = date('Y-m-d');
 
-/* OBTENER DATOS */
-$stmtUser = $db->prepare("SELECT correo FROM usuarios WHERE id = :id");
-$stmtUser->execute([":id" => $usuario_id]);
-$userData = $stmtUser->fetch();
-$correo = $userData['correo'] ?? "estudiante@inatec.edu.ni";
+// --- NUEVA LÓGICA: CONSULTA SI YA SE ACTIVÓ ASISTENCIA HOY ---
+// (Asumimos que si hay al menos un registro de asistencia hoy, la sesión ya fue abierta)
+$sql_check = "SELECT COUNT(*) FROM asistencias WHERE DATE(fecha) = :hoy";
+$stmt_check = $db->prepare($sql_check);
+$stmt_check->execute([':hoy' => $hoy]);
+$asistencia_realizada = ($stmt_check->fetchColumn() > 0);
 
-/* ESTADÍSTICAS */
-$totalClases = (int) $db->query("SELECT COUNT(DISTINCT fecha) FROM asistencias")->fetchColumn();
-$stmt = $db->prepare("SELECT COUNT(*) FROM asistencias WHERE usuario_id = :id");
-$stmt->execute([":id" => $usuario_id]);
-$asistidas = (int) $stmt->fetchColumn();
-$porcentaje = $totalClases > 0 ? round(($asistidas / $totalClases) * 100) : 0;
+// 2. OBTENCIÓN DE DATOS ESTUDIANTES
+try {
+    $sql = "SELECT u.id, u.nombre, u.usuario, 
+               CASE WHEN a.id IS NOT NULL THEN 'Presente' ELSE 'Ausente' END AS estado_hoy
+           FROM usuarios u
+           LEFT JOIN asistencias a ON u.id = a.usuario_id AND DATE(a.fecha) = :hoy
+           WHERE u.rol_id = 3 
+           ORDER BY u.nombre ASC";
 
-$mis_faltas_seguidas = obtenerFaltasConsecutivas($db, $usuario_id, 3);
-$estudiante_id_format = formatearID($usuario_id);
-$estaEnRed = esRedInatec(); 
+    $stmt = $db->prepare($sql);
+    $stmt->execute([':hoy' => $hoy]);
+    $estudiantes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-/* HISTORIAL */
-$stmtHistorial = $db->prepare("
-    SELECT f.fecha, 
-           CASE WHEN a.id IS NOT NULL THEN 'Presente' ELSE 'Ausente' END AS estado
-    FROM (SELECT DISTINCT fecha FROM asistencias) f
-    LEFT JOIN asistencias a ON f.fecha = a.fecha AND a.usuario_id = :id
-    ORDER BY f.fecha DESC LIMIT 6
-");
-$stmtHistorial->execute([":id" => $usuario_id]);
-$historial = $stmtHistorial->fetchAll();
-?>
+    $total_alumnos = count($estudiantes);
+    $presentes = 0;
+    foreach($estudiantes as $e) { if($e['estado_hoy'] == 'Presente') $presentes++; }
+    $porcentaje_asistencia = ($total_alumnos > 0) ? round(($presentes / $total_alumnos) * 100) : 0;
+} catch (Exception $e) {
+    die("Error en la base de datos: " . $e->getMessage());
+}
+?> 
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGA - Dashboard Estudiante</title>
+    <title>SGA - Maestro Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* MODO OSCURO (Default) */
-            --bg-body: radial-gradient(circle at top right, #001f3f, #00050a);
-            --text-main: #ffffff;
-            --text-muted: rgba(255, 255, 255, 0.7);
-            --glass: rgba(255, 255, 255, 0.08);
-            --glass-border: rgba(255, 255, 255, 0.15);
             --primary: #00d4ff;
-            --nav-bg: rgba(0, 0, 0, 0.4);
+            --success: #00ffa3;
+            --bg-body: radial-gradient(circle at top right, #001f3f, #00050a);
+            --glass: rgba(255, 255, 255, 0.07);
+            --text-main: #ffffff;
         }
 
         [data-theme="light"] {
-            /* MODO CLARO */
             --bg-body: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             --text-main: #1a2a3a;
-            --text-muted: #5a6a7a;
-            --glass: rgba(255, 255, 255, 0.8);
-            --glass-border: rgba(0, 0, 0, 0.1);
-            --primary: #007bff;
-            --nav-bg: rgba(255, 255, 255, 0.8);
         }
 
-        body { 
-            background: var(--bg-body) !important; 
-            color: var(--text-main); 
-            font-family: 'Inter', sans-serif; 
+        body {
+            background: var(--bg-body) !important;
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
             min-height: 100vh;
-            transition: all 0.3s ease;
         }
 
         .glass-card {
             background: var(--glass);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 20px;
             padding: 1.5rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
         }
 
-        .text-muted { color: var(--text-muted) !important; }
-        h1, h2, h3, h4, h5, h6 { color: var(--text-main); }
-
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Selector de Tema */
-        .theme-toggle {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            color: var(--text-main);
-            width: 40px; height: 40px;
+        /* --- BOTÓN ANIMADO --- */
+        .btn-status {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
+            padding: 10px 25px;
+            font-weight: 700;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        /* FAB Asistencia */
-        .qr-fab {
-            position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
-            width: 65px; height: 65px; border-radius: 50%;
-            background: linear-gradient(135deg, #00d4ff, #004a99);
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.4);
-            cursor: pointer; z-index: 1000; transition: 0.3s;
-            color: white !important;
+        /* Estado Inicial (Azul) */
+        .btn-active-qr {
+            background: linear-gradient(135deg, var(--primary), #004a99);
+            color: white;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
         }
-        .qr-fab.disabled { filter: grayscale(1); opacity: 0.5; cursor: not-allowed; }
 
-        /* Nav Bottom */
-        .bottom-nav {
-            position: fixed; bottom: 0; width: 100%; height: 75px;
-            background: var(--nav-bg); backdrop-filter: blur(20px);
-            display: flex; justify-content: space-around; align-items: center;
-            border-top: 1px solid var(--glass-border);
-            z-index: 999;
+        /* Estado Completado (Verde) */
+        .btn-completed {
+            background: rgba(0, 255, 163, 0.1) !important;
+            color: var(--success) !important;
+            border: 1px solid var(--success) !important;
+            cursor: default;
+            pointer-events: none; /* Desactiva clics */
+            animation: pulseSuccess 2s infinite;
         }
-        .nav-item { color: var(--text-muted); font-size: 1.2rem; cursor: pointer; text-align: center; text-decoration: none; }
-        .nav-item.active { color: var(--primary); }
-        .nav-label { font-size: 0.65rem; display: block; margin-top: 2px; }
 
-        /* Progress Bar */
-        .progress-container { height: 8px; background: rgba(127,127,127,0.2); border-radius: 10px; overflow: hidden; }
+        @keyframes pulseSuccess {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 163, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 255, 163, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 163, 0); }
+        }
+
+        .search-container { position: relative; min-width: 280px; }
+        #studentSearch {
+            background: var(--glass) !important;
+            color: var(--text-main) !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
+            padding-left: 2.8rem !important;
+            border-radius: 12px;
+        }
+        .search-icon { position: absolute; top: 50%; left: 15px; transform: translateY(-50%); color: var(--primary); }
+        
+        .table-custom { width: 100%; border-spacing: 0 8px; border-collapse: separate; }
+        .table-custom tr { background: var(--glass); border-radius: 15px; }
+        .table-custom td { padding: 1rem; vertical-align: middle; }
     </style>
 </head>
-<body data-theme="dark">
+<body>
 
-<div class="container pt-4 pb-5" style="max-width: 450px;">
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-md-2 d-none d-md-block p-4" style="background: rgba(0,0,0,0.2); min-height: 100vh;">
+            <div class="text-center mb-5">
+                <h6 class="fw-bold mb-0"><?= $nombre ?></h6>
+                <small class="text-info">MAESTRO</small>
+            </div>
+            <div class="nav flex-column gap-2">
+                <a href="maestro.php" class="nav-link text-white active"><i class="bi bi-grid-fill me-2"></i> Dashboard</a>
+                <a href="logout.php" class="nav-link text-danger mt-5"><i class="bi bi-door-open me-2"></i> Salir</a>
+            </div>
+        </nav>
+
+        <main class="col-md-10 p-4">
+            <header class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="fw-bold mb-0">Gestión de <span class="text-info">Asistencia</span></h3>
+                    <p class="text-muted small mb-0"><?= date('l, d F Y') ?></p>
+                </div>
+                
+                <div class="d-flex gap-3 align-items-center">
+                    <div class="theme-toggle" onclick="toggleTheme()" style="cursor:pointer;">
+                        <i class="bi bi-moon-stars" id="themeIcon"></i>
+                    </div>
+
+                    <?php if ($asistencia_realizada): ?>
+                        <div class="btn-status btn-completed">
+                            <i class="bi bi-check-circle-fill"></i> ASISTENCIA REGISTRADA
+                        </div>
+                    <?php else: ?>
+                        <button class="btn-status btn-active-qr" onclick="generarQR()">
+                            <i class="bi bi-qr-code-scan"></i> ACTIVAR QR
+                        </button>
+                    <?php if ($asistencia_realizada): ?>
     
-    <div class="d-flex justify-content-between align-items-center mb-4 px-2">
-        <div>
-            <h5 class="mb-0 fw-bold">Hola, <?= explode(' ', $nombre)[0] ?></h5>
-            <span class="badge bg-info text-dark" style="font-size: 0.65rem; font-weight: 600;">ESTUDIANTE</span>
-        </div>
-        <div class="d-flex gap-2 align-items-center">
-            <div class="theme-toggle" id="themeBtn" onclick="toggleTheme()">
-                <i class="bi bi-moon-stars" id="themeIcon"></i>
+<?php endif; ?>
+                    <?php endif; ?>
+                </div>
+            </header>
+
+            <div class="row g-3 mb-4 text-center">
+                <div class="col-md-4">
+                    <div class="glass-card border-bottom border-primary border-4">
+                        <small class="fw-bold text-uppercase" style="color:var(--text-main)">Promedio Hoy</small>
+                        <h2 class="fw-bold mb-0 text-primary"><?= $porcentaje_asistencia ?>%</h2>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="glass-card border-bottom border-success border-4">
+                        <small class="fw-bold text-uppercase" style="color:var(--text-main)">Presentes</small>
+                        <h2 class="fw-bold mb-0 text-success"><?= $presentes ?> / <?= $total_alumnos ?></h2>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="glass-card border-bottom border-danger border-4">
+                        <small class="fw-bold text-uppercase" style="color:var(--text-main)">Ausentes</small>
+                        <h2 class="fw-bold mb-0 text-danger"><?= $total_alumnos - $presentes ?></h2>
+                    </div>
+                </div>
             </div>
-            <img src="https://ui-avatars.com/api/?name=<?= $nombre ?>&background=00d4ff&color=000" class="rounded-circle border border-2 border-info" width="42">
-        </div>
-    </div>
 
-    <?php if(!$estaEnRed): ?>
-        <div class="alert alert-warning py-2 rounded-4 border-0 mb-4 d-flex align-items-center" style="background: rgba(255, 193, 7, 0.15); color: #ffca2c;">
-            <i class="bi bi-wifi-off fs-5 me-2"></i> 
-            <small class="fw-medium">Conéctate al WiFi del centro para marcar asistencia.</small>
-        </div>
-    <?php endif; ?>
-
-    <div id="home" class="tab-content active">
-        <div class="glass-card text-center">
-            <span class="text-muted small fw-bold text-uppercase tracking-wider">Mi Asistencia Total</span>
-            <h2 class="fw-bold my-2" style="font-size: 2.5rem;"><?= $porcentaje ?>%</h2>
-            <div class="progress-container">
-                <div style="width: <?= $porcentaje ?>%; height: 100%; background: var(--primary);"></div>
+            <div class="glass-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Listado de Estudiantes</h5>
+                    <div class="search-container">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text" id="studentSearch" class="form-control" placeholder="Filtrar alumno...">
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table-custom" id="attendanceTable">
+                        <thead>
+                            <tr class="text-info small fw-bold">
+                                <td>ESTUDIANTE</td>
+                                <td class="text-center">USUARIO</td>
+                                <td class="text-center">ESTADO</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($estudiantes as $est): ?>
+                            <tr class="student-row">
+                                <td><span class="fw-semibold student-name"><?= $est['nombre'] ?></span></td>
+                                <td class="text-center text-info">@<?= $est['usuario'] ?></td>
+                                <td class="text-center">
+                                    <span class="badge rounded-pill <?= ($est['estado_hoy'] === 'Presente') ? 'bg-success' : 'bg-danger'; ?> px-3">
+                                        <?= strtoupper($est['estado_hoy']) ?>
+                                    </span>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
-
-        <div class="glass-card">
-            <h6 class="fw-bold mb-1">Ciberseguridad y Redes</h6>
-            <p class="small text-muted mb-0"><i class="bi bi-geo-alt me-1"></i> Laboratorio A1 - Somoto</p>
-        </div>
-
-        <div class="glass-card text-center border-info border-opacity-25" style="border-style: dashed; background: rgba(0, 212, 255, 0.03);">
-            <p class="small text-info mb-1 fw-bold">LLAVE DINÁMICA</p>
-            <h4 class="font-monospace mb-0 fw-bold" style="letter-spacing: 2px;">
-                <?= date('H') ?>•<?= substr(md5($usuario_id), 0, 4) ?>•<?= date('i') ?>
-            </h4>
-        </div>
+        </main>
     </div>
-
-    <div id="historial" class="tab-content">
-        <h6 class="mb-3 ps-2 fw-bold">Historial de Clases</h6>
-        <?php foreach($historial as $h): ?>
-            <div class="glass-card py-2 d-flex justify-content-between align-items-center">
-                <span class="fw-medium small"><?= date('d/m/Y', strtotime($h['fecha'])) ?></span>
-                <span class="badge rounded-pill <?= $h['estado']=='Presente' ? 'bg-success':'bg-danger' ?> bg-opacity-25 text-<?= $h['estado']=='Presente' ? 'success':'danger' ?>" style="font-size: 0.7rem;">
-                    <?= $h['estado'] ?>
-                </span>
-            </div>
-        <?php endforeach; ?>
-    </div>
-
-    <div id="id-digital" class="tab-content text-center">
-        <div class="glass-card py-4">
-            <div id="qrcode" class="d-flex justify-content-center mb-3 p-3 bg-white rounded-4 shadow-sm mx-auto" style="width: fit-content;"></div>
-            <h5 class="fw-bold mb-1"><?= $nombre ?></h5>
-            <p class="text-info small font-monospace mb-0"><?= $estudiante_id_format ?></p>
-            <p class="text-muted small mt-2"><?= $correo ?></p>
-        </div>
-    </div>
-
 </div>
 
-<div class="qr-fab <?= !$estaEnRed ? 'disabled' : '' ?>" id="btnAsistencia" onclick="marcarAsistencia()">
-    <i class="bi bi-qr-code-scan fs-2"></i>
+<div class="modal fade" id="modalAsistencia" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 bg-dark text-white rounded-5">
+            <div class="modal-body text-center p-5">
+                <i class="bi bi-broadcast fs-1 text-info mb-3"></i>
+                <h4 class="fw-bold">Código QR de Asistencia</h4>
+                <div id="contenedorQR" class="mx-auto my-4 p-3 bg-white rounded-4" style="width: fit-content;"></div>
+                <button class="btn btn-outline-danger w-100 rounded-pill py-3 fw-bold" data-bs-dismiss="modal">CERRAR</button>
+            </div>
+        </div>
+    </div>
 </div>
 
-<nav class="bottom-nav">
-    <div class="nav-item active" onclick="showTab('home', this)">
-        <i class="bi bi-grid-1x2-fill"></i><span class="nav-label">Inicio</span>
-    </div>
-    <div class="nav-item" onclick="showTab('historial', this)">
-        <i class="bi bi-calendar-check"></i><span class="nav-label">Bitácora</span>
-    </div>
-    <div style="width: 60px;"></div>
-    <div class="nav-item" onclick="showTab('id-digital', this); generateQR();">
-        <i class="bi bi-person-badge"></i><span class="nav-label">ID Tech</span>
-    </div>
-    <div class="nav-item" onclick="window.location.href='logout.php'">
-        <i class="bi bi-box-arrow-right"></i><span class="nav-label">Salir</span>
-    </div>
-</nav>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-    // 1. Cambio de Pestañas (Corregido para asegurar que los IDs existan)
-    function showTab(id, el) {
-        const targetTab = document.getElementById(id);
-        if (!targetTab) return; // Seguridad: si la pestaña no existe, no hace nada
-
-        // Ocultar todas las pestañas
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        // Quitar estado activo a todos los iconos de navegación
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        
-        // Mostrar la seleccionada
-        targetTab.classList.add('active');
-        if (el) el.classList.add('active');
-    }
-
-    // 2. Cambio de Tema (Con persistencia opcional)
-    function toggleTheme() {
-        const body = document.body;
-        const icon = document.getElementById('themeIcon');
-        if (!icon) return;
-
-        const currentTheme = body.getAttribute('data-theme');
-        if (currentTheme === 'dark') {
-            body.setAttribute('data-theme', 'light');
-            icon.className = 'bi bi-sun';
-            icon.style.color = '#1a2a3a';
-        } else {
-            body.setAttribute('data-theme', 'dark');
-            icon.className = 'bi bi-moon-stars';
-            icon.style.color = '#ffffff';
-        }
-    }
-
-    // 3. Generar QR para el Carnet (Corregido ID)
-    function generateQR() {
-        const qrBox = document.getElementById("qrcode");
-        if (!qrBox) return;
-
-        if (qrBox.innerHTML.trim() === "") {
-            new QRCode(qrBox, { 
-                text: "<?= $estudiante_id_format ?>", 
-                width: 160, 
-                height: 160, 
-                colorDark : "#000000", 
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H
-            });
-        }
-    }
-
-    // 4. Lógica de Asistencia (Sincronizada con el botón flotante)
-    function marcarAsistencia() {
-        // Verificación de red desde PHP
-        const estaEnRed = <?= $estaEnRed ? 'true' : 'false' ?>;
-        
-        if (!estaEnRed) {
-            alert("⚠️ Acceso denegado: Debes estar conectado al WiFi oficial del centro.");
-            return;
-        }
-
-        const btn = document.getElementById('btnAsistencia');
-        if (!btn) return;
-
-        const iconOriginal = '<i class="bi bi-qr-code-scan fs-2"></i>';
-        
-        // Estado de carga
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-        btn.style.pointerEvents = 'none'; 
-
-        fetch("registrar_asistencia.php", { 
-            method: "POST" 
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.status === "ok") {
-                alert("✅ " + (data.message || "Asistencia registrada con éxito"));
-                location.reload(); 
-            } 
-            else if (data.status === "existe") {
-                alert("ℹ️ " + (data.message || "Ya habías registrado tu asistencia hoy."));
-                btn.innerHTML = iconOriginal;
-                btn.style.pointerEvents = 'auto';
-            } 
-            else {
-                alert("❌ Error: " + data.message);
-                btn.innerHTML = iconOriginal;
-                btn.style.pointerEvents = 'auto';
-            }
-        })
-        .catch(err => {
-            console.error("Error:", err);
-            alert("🚨 Error de comunicación con el servidor.");
-            btn.innerHTML = iconOriginal;
-            btn.style.pointerEvents = 'auto';
+    // Buscador
+    document.getElementById('studentSearch').addEventListener('keyup', function() {
+        let val = this.value.toLowerCase();
+        document.querySelectorAll('.student-row').forEach(row => {
+            let name = row.querySelector('.student-name').innerText.toLowerCase();
+            row.style.display = name.includes(val) ? '' : 'none';
         });
+    });
+
+    // QR
+    function generarQR() {
+        const contenedor = document.getElementById("contenedorQR");
+        contenedor.innerHTML = ""; 
+        const url = window.location.origin + "/procesar_qr.php?clase=ClaseActual&fecha=<?= $hoy ?>";
+        new QRCode(contenedor, { text: url, width: 220, height: 220 });
+        new bootstrap.Modal(document.getElementById('modalAsistencia')).show();
     }
 
-    // Auto-ejecución al cargar (Opcional: para limpiar splash screen si lo tienes)
-    window.onload = () => {
-        console.log("Sistema SGA Cargado correctamente.");
-    };
+    // Tema
+    function toggleTheme() {
+        const body = document.documentElement;
+        let theme = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        body.setAttribute('data-theme', theme);
+        localStorage.setItem('sga_theme', theme);
+    }
 </script>
-
-
-
 </body>
 </html>
