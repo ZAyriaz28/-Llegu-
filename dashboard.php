@@ -54,7 +54,7 @@ try {
             --glass: rgba(255, 255, 255, 0.07);
             --glass-border: rgba(255, 255, 255, 0.12);
             --text-main: #ffffff;
-            --text-muted: #b0c4de; /* Color más claro para legibilidad en Dark Mode */
+            --text-muted: #b0c4de;
         }
 
         [data-theme="light"] {
@@ -83,6 +83,13 @@ try {
             margin-bottom: 1.5rem;
         }
 
+        /* Mejora contraste texto estadísticas */
+        .glass-card small.text-muted.fw-bold {
+            color: #ffffff !important;
+            text-shadow: 0 0 5px rgba(255,255,255,0.2);
+            opacity: 1 !important;
+        }
+
         .theme-toggle {
             cursor: pointer; width: 45px; height: 45px; border-radius: 12px;
             background: var(--glass); border: 1px solid var(--glass-border);
@@ -90,7 +97,6 @@ try {
             color: var(--text-main); font-size: 1.2rem;
         }
 
-        /* Tabla Estilizada */
         .table-custom { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
         .table-custom tr { background: var(--glass); transition: 0.2s; border-radius: 15px; }
         .table-custom tr:hover { transform: scale(1.005); background: rgba(255,255,255,0.12); }
@@ -99,7 +105,7 @@ try {
         .table-custom td:last-child { border-radius: 0 15px 15px 0; }
 
         .student-user {
-            color: var(--primary) !important; /* Resalta el usuario en la tabla */
+            color: var(--primary) !important;
             font-size: 0.85rem;
         }
 
@@ -116,13 +122,28 @@ try {
         .nav-link { color: var(--text-muted); transition: 0.3s; }
         .nav-link:hover, .nav-link.active { color: var(--primary) !important; }
 
-        /* Mejora contraste Input */
+        /* Estilos Buscador */
+        .search-container {
+            position: relative;
+            min-width: 280px;
+        }
+
         #studentSearch {
-            background: rgba(0,0,0,0.2) !important;
+            background: rgba(0, 0, 0, 0.3) !important;
             color: white !important;
             border: 1px solid var(--glass-border) !important;
+            padding-left: 2.8rem !important;
+            border-radius: 12px;
         }
-        #studentSearch::placeholder { color: var(--text-muted); }
+
+        .search-icon {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            color: var(--primary);
+            z-index: 5;
+        }
     </style>
 </head>
 <body>
@@ -186,9 +207,9 @@ try {
             <div class="glass-card">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="fw-bold mb-0">Control de Grupo</h5>
-                    <div class="position-relative w-25">
-                        <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-                        <input type="text" id="studentSearch" class="form-control ps-5 border-0" placeholder="Filtrar alumno...">
+                    <div class="search-container">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text" id="studentSearch" class="form-control" placeholder="Filtrar alumno...">
                     </div>
                 </div>
                 
@@ -249,7 +270,6 @@ try {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-    // 1. Filtrado de Búsqueda
     document.getElementById('studentSearch').addEventListener('keyup', function() {
         let val = this.value.toLowerCase();
         document.querySelectorAll('.student-row').forEach(row => {
@@ -258,7 +278,6 @@ try {
         });
     });
 
-    // 2. Persistencia de Tema
     function toggleTheme() {
         const body = document.documentElement;
         const icon = document.getElementById('themeIcon');
@@ -269,7 +288,6 @@ try {
         localStorage.setItem('sga_theme', theme);
     }
 
-    // Cargar tema guardado
     (function() {
         const savedTheme = localStorage.getItem('sga_theme') || 'dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
@@ -279,7 +297,6 @@ try {
         });
     })();
 
-    // 3. Generación de QR
     function generarQR() {
         const contenedor = document.getElementById("contenedorQR");
         contenedor.innerHTML = ""; 
