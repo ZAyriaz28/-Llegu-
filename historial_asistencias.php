@@ -29,6 +29,7 @@ $nombre_maestro = $_SESSION["nombre"];
             --deep-navy: #000b1a;
             --glass-dark: rgba(255, 255, 255, 0.05);
             --glass-border: rgba(255, 255, 255, 0.1);
+            --text-silver: #e0e0e0;
         }
 
         body {
@@ -36,18 +37,18 @@ $nombre_maestro = $_SESSION["nombre"];
             background: radial-gradient(circle at top right, #002f61, #000b1a);
             background-attachment: fixed;
             min-height: 100vh;
-            color: #ffffff;
+            color: var(--text-silver);
             padding: 20px;
         }
 
         /* Panel Principal Glassmorphism */
         .main-container {
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.4);
             border-radius: 30px;
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
             padding: 40px;
             max-width: 1200px;
             margin: auto;
@@ -63,7 +64,7 @@ $nombre_maestro = $_SESSION["nombre"];
 
         /* Inputs Estilo Cyberpunk */
         .form-control, .input-group-text {
-            background: rgba(255, 255, 255, 0.05) !important;
+            background: rgba(255, 255, 255, 0.07) !important;
             border: 1px solid var(--glass-border) !important;
             color: white !important;
             border-radius: 12px;
@@ -74,23 +75,31 @@ $nombre_maestro = $_SESSION["nombre"];
             box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
         }
 
-        /* Tablas Tecnológicas */
+        /* Ajuste para iconos de calendario en inputs de fecha */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        /* Tablas Tecnológicas - CORRECCIÓN MODO NOCHE */
         .table-container {
             border-radius: 20px;
             overflow: hidden;
             background: rgba(0, 0, 0, 0.2);
             border: 1px solid var(--glass-border);
+            margin-top: 20px;
         }
 
         .custom-table {
-            color: white !important;
+            color: var(--text-silver) !important;
             margin-bottom: 0;
             border-collapse: separate;
             border-spacing: 0 8px;
+            background: transparent !important;
         }
 
         .custom-table thead th {
-            background: transparent;
+            background: rgba(0, 212, 255, 0.1);
             color: var(--tech-cyan);
             text-transform: uppercase;
             font-size: 0.75rem;
@@ -100,12 +109,12 @@ $nombre_maestro = $_SESSION["nombre"];
         }
 
         .custom-table tbody tr {
-            background: rgba(255, 255, 255, 0.02);
+            background: rgba(255, 255, 255, 0.03) !important;
             transition: all 0.3s ease;
         }
 
         .custom-table tbody tr:hover {
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(0, 212, 255, 0.08) !important;
             transform: scale(1.005);
         }
 
@@ -113,6 +122,17 @@ $nombre_maestro = $_SESSION["nombre"];
             padding: 15px 20px !important;
             vertical-align: middle;
             border: none !important;
+            background: transparent !important;
+            color: var(--text-silver) !important;
+        }
+
+        /* Badge de asistencia */
+        .badge-presente {
+            background: rgba(0, 255, 128, 0.1) !important;
+            color: #00ff80 !important;
+            border: 1px solid #00ff80;
+            text-shadow: 0 0 5px rgba(0, 255, 128, 0.5);
+            font-size: 0.7rem;
         }
 
         /* Botones Neón */
@@ -131,7 +151,7 @@ $nombre_maestro = $_SESSION["nombre"];
         }
 
         .btn-excel {
-            background: rgba(29, 111, 66, 0.2);
+            background: rgba(46, 204, 113, 0.1);
             color: #2ecc71;
             border: 1px solid #2ecc71;
         }
@@ -139,21 +159,13 @@ $nombre_maestro = $_SESSION["nombre"];
         .btn-excel:hover {
             background: #1D6F42;
             color: white;
-            box-shadow: 0 0 20px rgba(46, 204, 113, 0.4);
-        }
-
-        /* Badge de asistencia */
-        .badge-presente {
-            background: rgba(0, 255, 128, 0.1) !important;
-            color: #00ff80 !important;
-            border: 1px solid #00ff80;
-            text-shadow: 0 0 5px #00ff80;
         }
 
         .avatar-mini {
             background: linear-gradient(135deg, var(--primary-blue), var(--tech-cyan));
             border: 1px solid rgba(255,255,255,0.3);
             box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+            flex-shrink: 0;
         }
 
         .bg-icon-tech {
@@ -168,10 +180,6 @@ $nombre_maestro = $_SESSION["nombre"];
 
         .blink-cyan { animation: blinker 2s infinite alternate; }
         @keyframes blinker { from { opacity: 1; } to { opacity: 0.4; } }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-thumb { background: var(--primary-blue); border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -266,6 +274,7 @@ document.getElementById('btnConsultar').addEventListener('click', function() {
         return;
     }
 
+    // Limpiar y mostrar carga
     tbody.innerHTML = '';
     noData.classList.add('d-none');
     loading.classList.remove('d-none');
@@ -297,17 +306,18 @@ document.getElementById('btnConsultar').addEventListener('click', function() {
             const fila = `
                 <tr class="animate__animated animate__fadeInUp" style="animation-delay: ${index * 0.05}s">
                     <td class="ps-4">
-                        <span class="text-info fw-bold" style="font-family: monospace;">${reg.fecha}</span>
+                        <span class="text-info fw-bold" style="font-family: monospace; font-size: 0.85rem;">${reg.fecha}</span>
                     </td>
                     <td>
                         <div class="d-flex align-items-center">
-                            <div class="avatar-mini text-white rounded-circle me-3 d-flex align-items-center justify-content-center fw-bold" style="width: 35px; height: 35px; font-size: 0.7rem;">
+                            <div class="avatar-mini text-white rounded-circle me-3 d-flex align-items-center justify-content-center fw-bold" 
+                                 style="width: 35px; height: 35px; font-size: 0.7rem;">
                                 ${iniciales}
                             </div>
-                            <span class="fw-semibold" style="color: #e0e0e0;">${reg.nombre}</span>
+                            <span class="fw-semibold text-light">${reg.nombre}</span>
                         </div>
                     </td>
-                    <td><code class="text-info opacity-75">@${reg.usuario}</code></td>
+                    <td><code class="text-info opacity-75" style="background: transparent;">@${reg.usuario}</code></td>
                     <td class="small text-white-50">${reg.clase}</td>
                     <td class="text-center fw-bold" style="color: var(--tech-cyan);">${reg.hora}</td>
                     <td class="pe-4 text-center">
@@ -326,14 +336,15 @@ document.getElementById('btnConsultar').addEventListener('click', function() {
     });
 });
 
+// Exportar a Excel
 document.getElementById('btnExportar').addEventListener('click', function() {
     const table = document.getElementById("tablaAsistencias");
     if(table.rows.length <= 1) {
         alert("No hay paquetes de datos para exportar.");
         return;
     }
-    const wb = XLSX.utils.table_to_book(table, {sheet: "Historial"});
-    XLSX.writeFile(wb, `SGA_Report_${new Date().getTime()}.xlsx`);
+    const wb = XLSX.utils.table_to_book(table, {sheet: "Historial_Asistencia"});
+    XLSX.writeFile(wb, `SGA_Secure_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
 });
 </script>
 
