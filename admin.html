@@ -24,7 +24,6 @@
             --glass: rgba(189, 187, 176, 0.445);
             --glass-border: rgba(0, 0, 0, 0.08);
             --text-main: #1a2a3a;
-            --text: #rgb(19, 49, 80)
             --primary: #0d498a;
         }
 
@@ -42,9 +41,9 @@
             border: 1px solid var(--glass-border);
             border-radius: 20px;
             padding: 2rem;
+            margin-bottom: 1.5rem;
         }
 
-        /* Botón de Tema */
         .theme-toggle {
             cursor: pointer; width: 45px; height: 45px; border-radius: 12px;
             background: var(--glass); border: 1px solid var(--glass-border);
@@ -52,10 +51,9 @@
             color: var(--text-main); font-size: 1.2rem;
             transition: 0.3s;
         }
-        .theme-toggle:hover { border-color: var(--primary); transform: scale(1.05); }
 
         .table-custom { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
-        .table-custom tr { background: var(--glass); transition: 0.3s; }
+        .table-custom tr { background: var(--glass); transition: 0.3s; cursor: pointer; }
         .table-custom tr:hover { background: rgba(255,255,255,0.12); transform: translateY(-2px); }
         .table-custom td, .table-custom th { padding: 1.2rem; border: none; vertical-align: middle; }
         .table-custom td:first-child { border-radius: 15px 0 0 15px; }
@@ -68,15 +66,39 @@
             border-radius: 10px;
             padding: 8px 20px;
             font-weight: 600;
-            transition: 0.3s;
         }
-        .btn-approve:hover { background: var(--success); color: #000; box-shadow: 0 0 15px var(--success); }
 
         .admin-badge {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             padding: 5px 15px; border-radius: 50px;
             font-size: 0.75rem; font-weight: 700; color: white;
         }
+
+        /* Estilos del Perfil Expandido */
+        .profile-header {
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-box {
+            background: rgba(0, 212, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .search-container { position: relative; max-width: 300px; width: 100%; }
+        .search-input {
+            background: var(--glass) !important;
+            border: 1px solid var(--glass-border) !important;
+            color: var(--text-main) !important;
+            border-radius: 12px;
+            padding-left: 40px;
+        }
+        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--primary); }
+
     </style>
 </head>
 <body>
@@ -99,44 +121,97 @@
     </header>
 
     <div class="row g-4">
-        <div class="col-md-4">
-            <div class="glass-card text-center border-bottom border-info border-3">
-                <i class="bi bi-people-fill fs-1 text-info mb-2"></i>
-                <h6 class="fw-bold mb-0">MAESTROS PENDIENTES</h6>
-                <h2 class="fw-bold mb-0">3</h2>
-            </div>
-        </div>
-
-        <div class="col-md-12">
+        <div class="col-lg-8">
             <div class="glass-card">
-                <h4 class="fw-bold mb-4"><i class="bi bi-shield-check me-2"></i>Validación de Docentes</h4>
-                
+                <h4 class="fw-bold mb-4"><i class="bi bi-shield-check me-2 text-info"></i>Validación de Docentes</h4>
                 <div class="table-responsive">
                     <table class="table-custom">
-                        <thead>
-                            <tr class="text-info small fw-bold text-uppercase">
-                                <th>Maestro</th>
-                                <th>Usuario/Correo</th>
-                                <th>Fecha Registro</th>
-                                <th class="text-end">Acción</th>
-                            </tr>
-                        </thead>
                         <tbody>
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div class="bg-primary bg-opacity-10 text-primary rounded-circle me-3 d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">JS</div>
-                                        <span class="">Juan Salvador</span>
+                                        <span>Juan Salvador</span>
                                     </div>
                                 </td>
-                                <td><span class="text">juan.salvador@inatec.edu.ni</span></td>
-                                <td class="text small">27 Feb 2026</td>
-                                <td class="text-end">
-                                    <button class="btn-approve"><i class="bi bi-check-lg me-1"></i>AUTORIZAR</button>
-                                </td>
+                                <td><button class="btn-approve btn-sm w-100">AUTORIZAR</button></td>
                             </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <div class="glass-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="fw-bold mb-0"><i class="bi bi-mortarboard me-2 text-success"></i>Estudiantes</h4>
+                    <div class="search-container">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text" id="studentSearch" class="form-control search-input" placeholder="Buscar...">
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table-custom">
+                        <thead>
+                            <tr class="text small fw-bold">
+                                <th>NOMBRE</th>
+                                <th>ID</th>
+                                <th class="text-end">ESTADO</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentList">
+                            <tr onclick="verPerfil('Luis Heberto', 'EST-00252', 'l.heberto@inatec.edu.ni', '85%', '98%')">
+                                <td>Luis Heberto</td>
+                                <td><code class="text-info">EST-00252</code></td>
+                                <td class="text-end"><span class="badge bg-success bg-opacity-10 text-success border border-success">ACTIVO</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="glass-card sticky-top" style="top: 20px;" id="perfilContenedor">
+                <div id="perfilVacio" class="text-center py-5">
+                    <i class="bi bi-person-bounding-box fs-1 text opacity-25"></i>
+                    <p class="text mt-3">Selecciona un estudiante para ver su perfil detallado</p>
+                </div>
+
+                <div id="perfilDetalle" class="d-none">
+                    <div class="text-center profile-header">
+                        <div class="bg-info mx-auto mb-3 d-flex align-items-center justify-content-center fw-bold rounded-circle shadow" 
+                             style="width: 80px; height: 80px; font-size: 1.5rem; color: #000;" id="profInitial">
+                            LH
+                        </div>
+                        <h4 class="fw-bold mb-1" id="profName">Nombre Estudiante</h4>
+                        <span class="badge bg-primary bg-opacity-10 text-primary mb-2" id="profID">EST-00000</span>
+                        <p class="small text mb-0" id="profEmail">correo@inatec.edu.ni</p>
+                    </div>
+
+                    <div class="row g-2 mb-4">
+                        <div class="col-6">
+                            <div class="stat-box">
+                                <small class="text-muted d-block">Asistencia</small>
+                                <strong class="text-info" id="profAsis">0%</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-box">
+                                <small class="text-muted d-block">Rendimiento</small>
+                                <strong class="text-success" id="profRend">0%</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center p-3 bg-white rounded-4 mb-4 mx-auto" style="width: fit-content;">
+                        <i class="bi bi-qr-code text-dark" style="font-size: 5rem;"></i>
+                        <div class="text-dark small fw-bold font-monospace mt-1">ID DIGITAL VERIFICADO</div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-info btn-sm rounded-pill"><i class="bi bi-envelope me-2"></i>Enviar Notificación</button>
+                        <button class="btn btn-outline-danger btn-sm rounded-pill"><i class="bi bi-slash-circle me-2"></i>Suspender Acceso</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -144,17 +219,28 @@
 </div>
 
 <script>
+    // Función para mostrar el perfil del estudiante al hacer clic en la tabla
+    function verPerfil(nombre, id, correo, asis, rend) {
+        document.getElementById('perfilVacio').classList.add('d-none');
+        document.getElementById('perfilDetalle').classList.remove('d-none');
+
+        document.getElementById('profName').innerText = nombre;
+        document.getElementById('profID').innerText = id;
+        document.getElementById('profEmail').innerText = correo;
+        document.getElementById('profAsis').innerText = asis;
+        document.getElementById('profRend').innerText = rend;
+        document.getElementById('profInitial').innerText = nombre.substring(0, 2).toUpperCase();
+    }
+
     function toggleTheme() {
         const body = document.documentElement;
         const icon = document.getElementById('themeIcon');
         let theme = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-        
         body.setAttribute('data-theme', theme);
         icon.className = theme === 'dark' ? 'bi bi-moon-stars' : 'bi bi-sun';
         localStorage.setItem('theme', theme);
     }
 
-    // Cargar tema guardado
     (function() {
         const savedTheme = localStorage.getItem('theme') || 'dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
